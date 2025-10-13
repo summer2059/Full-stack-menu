@@ -6,6 +6,7 @@ use App\Http\Controllers\Dashboard\ConfigurationController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\MenuCategoryController;
 use App\Http\Controllers\Dashboard\MenuController;
+use App\Http\Controllers\FrontendController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -24,7 +25,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+Auth::routes([
+    'register' => false,
+    'reset' => false,
+    'verify' => false,
+]);
+Route::controller(FrontendController::class)->group(function () {
+    Route::get('/', 'index')->name('home-page');
+});
 
 Route::get('/dashboard/index', [App\Http\Controllers\HomeController::class, 'index'])->name('/dashboard/index');
 
