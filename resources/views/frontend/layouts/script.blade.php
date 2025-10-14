@@ -1,5 +1,5 @@
 <script src="{{ asset('frontend/js/script.js') }}"></script>
-<script>
+{{-- <script>
     // Category Filter
     document.querySelectorAll('.category-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -12,4 +12,4 @@
             });
         });
     });
-</script>
+</script> --}}

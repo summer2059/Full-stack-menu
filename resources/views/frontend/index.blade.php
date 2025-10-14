@@ -8,22 +8,47 @@
         <button class="category-btn active" data-category="all">All</button>
 
         @php
-            $categories = collect($menuItems)->pluck('category')->unique();
+            $categories = $menuItems->pluck('menuCategory.title')->unique();
         @endphp
 
         @foreach($categories as $category)
-            <button class="category-btn" data-category="{{ $category }}">{{ ucfirst($category) }}</button>
+            <button class="category-btn" data-category="{{ strtolower($category) }}">{{ ucfirst($category) }}</button>
         @endforeach
     </div>
 
     <!-- Menu Section -->
     <section class="menu" id="menu">
         @foreach($menuItems as $item)
-            <div class="card" data-category="{{ $item->category }}">
-                <img src="{{ $item->image }}" alt="{{ $item->name }}">
-                <h3>{{ $item->name }}</h3>
-                <p>${{ number_format($item->price, 2) }}</p>
-                <button onclick="addToCart('{{ $item->name }}', {{ $item->price }})">Add to Cart</button>
+            <div class="menu-card" data-category="{{ strtolower($item->menuCategory->title ?? 'uncategorized') }}">
+                <div class="img-wrapper">
+                    <img src="{{ asset('uploads/images/' . $item->image) }}" alt="{{ $item->title }}" class="menu-image">
+                </div>
+
+                <div class="card-body">
+                    <h3 class="menu-title">{{ $item->title }}</h3>
+                    <p class="description">{{ Str::limit($item->description, 80) }}</p>
+
+                    <div class="rating">
+                        @for ($i = 0; $i < 5; $i++)
+                            @if ($i < $item->rating)
+                                <i class="fas fa-star"></i>
+                            @else
+                                <i class="far fa-star"></i>
+                            @endif
+                        @endfor
+                    </div>
+
+                    <div class="price-section">
+                        @if ($item->original_price && $item->original_price > $item->price)
+                            <span class="original-price">NRs.{{ number_format($item->original_price, 0) }}</span>
+                        @endif
+                        <span class="discounted-price">NRs.{{ number_format($item->price, 0) }}</span>
+                    </div>
+
+                    <button class="cart-btn" onclick="addToCart('{{ $item->title }}', {{ $item->price }})">
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                </div>
             </div>
         @endforeach
     </section>

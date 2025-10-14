@@ -32,6 +32,7 @@ Auth::routes([
 ]);
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'index')->name('home-page');
+    Route::post('/submit-order', [FrontendController::class, 'submit'])->name('order.submit');
 });
 
 Route::get('/dashboard/index', [App\Http\Controllers\HomeController::class, 'index'])->name('/dashboard/index');

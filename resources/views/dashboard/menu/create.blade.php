@@ -60,6 +60,21 @@
                     <img id="imagePreview" src="#" alt="Image Preview" class="img-fluid rounded border d-none" style="max-width: 50%;">
                 </div>
 
+                <!-- Price -->
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price ($)</label>
+                    <input type="number" name="price" id="price" step="0.01" min="0" class="form-control @error('price') is-invalid @enderror" value="{{ old('price') }}">
+                    @error('price')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <!-- Rating -->
+                <div class="mb-3">
+                    <label for="rating" class="form-label">Rating (1-5)</label>
+                    <input type="number" name="rating" id="rating" step="0.1" min="1" max="5" class="form-control @error('rating') is-invalid @enderror" value="{{ old('rating') }}">
+                    @error('rating')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+
                 <!-- Priority -->
                 <div class="mb-3">
                     <label for="priority" class="form-label">Priority</label>

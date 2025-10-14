@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('rating')->default(0);
             $table->unsignedBigInteger('menu_category_id')->nullable();
             $table->foreign('menu_category_id')->references('id')->on('menu_categories')->onDelete('set null');
+            $table->integer('price')->default(0);
             $table->timestamps();
         });
     }
