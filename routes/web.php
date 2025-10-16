@@ -63,8 +63,16 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'dashboard'], function () {
     Route::resource('/menu', MenuController::class);
     //menu end
     //order start
-    Route::resource('/order', OrderController::class);
-    Route::post('/order/status', [OrderController::class, 'updateStatus'])->name('order.updateStatus');
+    // Route::resource('/order', OrderController::class);
+    // Route::post('/order/status', [OrderController::class, 'updateStatus'])->name('order.updateStatus');
+    Route::get('/orders', [OrderController::class, 'index'])->name('order.index');
+    Route::get('/orders/table/{table_number}', [OrderController::class, 'showUnpaidOrdersByTable'])->name('order.byTable');
+    Route::post('/orders/mark-paid', [OrderController::class, 'markAllPaid'])->name('order.markAllPaid');
+    Route::post('/orders/update-status', [OrderController::class, 'updateStatus'])->name('order.updateStatus');
+    Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('order.destroy');
+    Route::get('/orders/completed', [OrderController::class, 'completedOrders'])->name('order.completed');
+
+    //order end
 
     Route::get('/site-settings', [ConfigurationController::class, 'getConfiguration'])->name('settings');
     Route::post('/site-settings', [ConfigurationController::class, 'postConfiguration'])->name('settings.update');

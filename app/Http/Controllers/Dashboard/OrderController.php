@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Services\CrudService;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
-use App\Models\Order;
 
 class OrderController extends Controller
 {
@@ -26,45 +26,44 @@ class OrderController extends Controller
         confirmDelete($title, $text);
 
         if ($request->ajax()) {
-            $data = Order::with('menu')->latest()->get();
+            $data = Order::select('table_number')
+                ->where('status', '!=', 'payed')
+                ->groupBy('table_number')
+                ->get();
 
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('menu', function ($data) {
-                    return $data->menu ? $data->menu->title : 'N/A';
-                })
-                ->addColumn('status', function ($data) {
-                    $statuses = ['pending', 'preparing', 'served', 'payed', 'cancelled'];
-                    $options = '';
-                    foreach ($statuses as $status) {
-                        $selected = $data->status == $status ? 'selected' : '';
-                        $options .= "<option value='{$status}' {$selected}>".ucfirst($status)."</option>";
-                    }
-
-                    $badgeClass = match($data->status) {
-                        'pending' => 'badge bg-warning text-dark',
-                        'preparing' => 'badge bg-info text-dark',
-                        'served' => 'badge bg-success',
-                        'payed' => 'badge bg-primary',
-                        'cancelled' => 'badge bg-danger',
-                        default => 'badge bg-secondary',
-                    };
-
-                    return "
-                        <div class='status-wrapper'>
-                            <span class='{$badgeClass} status-badge'>".ucfirst($data->status)."</span>
-                            <select class='form-select order-status' data-id='{$data->id}'>{$options}</select>
-                        </div>
-                    ";
-                })
                 ->addColumn('action', function ($data) {
-                    return '<a href="order/' . $data->id . '" class="btn btn-sm btn-danger" data-confirm-delete="true">Delete</a>';
+                    return '<a href="' . route('order.byTable', $data->table_number) . '" class="btn btn-sm btn-primary">View</a>';
                 })
-                ->rawColumns(['action', 'status'])
                 ->make(true);
         }
 
         return view('dashboard.orders.index');
+    }
+
+    public function showUnpaidOrdersByTable($table_number)
+    {
+        $orders = Order::with('menu')
+            ->where('table_number', $table_number)
+            ->where('status', '!=', 'payed')
+            ->get();
+
+        return view('dashboard.orders.by_table', compact('orders', 'table_number'));
+    }
+
+    public function markAllPaid(Request $request)
+    {
+        $request->validate([
+            'table_number' => 'required|integer'
+        ]);
+
+        Order::where('table_number', $request->table_number)
+            ->where('status', '!=', 'payed')
+            ->update(['status' => 'payed']);
+
+        toast('All orders marked as paid!', 'success');
+        return redirect()->route('order.index');
     }
 
     public function destroy($id)
@@ -86,5 +85,25 @@ class OrderController extends Controller
         $order->save();
 
         return response()->json(['success' => true, 'message' => 'Order status updated successfully!']);
+    }
+    public function completedOrders(Request $request)
+    {
+        if ($request->ajax()) {
+            $orders = Order::with('menu')
+                ->where('status', 'payed')
+                ->latest()
+                ->get();
+
+            return DataTables::of($orders)
+                ->addIndexColumn()
+                ->addColumn('menu', fn($data) => $data->menu->title ?? 'N/A')
+                ->addColumn('status', function ($data) {
+                    return '<span class="badge bg-primary">Payed</span>';
+                })
+                ->rawColumns(['status'])
+                ->make(true);
+        }
+
+        return view('dashboard.orders.completed');
     }
 }
