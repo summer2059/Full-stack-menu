@@ -48,13 +48,6 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'dashboard'], function () {
     Route::get('/update-account', [DashboardController::class, 'account'])->name('update-account');
     Route::post('/update-profile', [DashboardController::class, 'update'])->name('profile.update');
 
-    Route::resource('/blog', BlogController::class);
-    Route::get('blog-image/{id}', [BlogController::class,'getBlogImage'])->name('blog-image');
-    Route::post('/blog/upload-images', [BlogController::class, 'uploadImages'])->name('blog.uploadImages');
-    Route::post('/blog/{id}/delete-image', [BlogController::class, 'deleteImage'])->name('blog.deleteImage');
-    Route::post('/blog/{id}/toggle-status', [BlogController::class, 'toggleStatus'])->name('blog.toggle-status');
-    //site settings
-
     //menu category start
     Route::resource('/menu-category', MenuCategoryController::class);
     //menu category end
