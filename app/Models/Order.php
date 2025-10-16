@@ -8,4 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'menu_id',
+        'quantity',
+        'total_price',
+        'table_number',
+        'status',
+    ];
+
+    public function menu()
+    {
+        return $this->belongsTo(Menu::class);
+    }
 }

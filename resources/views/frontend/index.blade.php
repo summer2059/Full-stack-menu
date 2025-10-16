@@ -6,11 +6,9 @@
     <!-- Category Bar -->
     <div class="category-bar" id="category-bar">
         <button class="category-btn active" data-category="all">All</button>
-
         @php
             $categories = $menuItems->pluck('menuCategory.title')->unique();
         @endphp
-
         @foreach($categories as $category)
             <button class="category-btn" data-category="{{ strtolower($category) }}">{{ ucfirst($category) }}</button>
         @endforeach
@@ -45,8 +43,9 @@
                         <span class="discounted-price">NRs.{{ number_format($item->price, 0) }}</span>
                     </div>
 
-                    <button class="cart-btn" onclick="addToCart('{{ $item->title }}', {{ $item->price }})">
-                        <i class="fas fa-shopping-cart"></i>
+                    {{-- ✅ Pass name & price to JS --}}
+                    <button class="cart-btn" onclick="addToCart({{ $item->id }}, '{{ $item->title }}', {{ $item->price }})">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
                 </div>
             </div>
