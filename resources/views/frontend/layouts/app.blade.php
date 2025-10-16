@@ -9,9 +9,10 @@
     {{-- Styles --}}
     @include('frontend.layouts.style')
     @stack('styles')
+    
 </head>
 <body>
-
+@include('sweetalert::alert')
     {{-- Header --}}
     @include('frontend.layouts.header')
 

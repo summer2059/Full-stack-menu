@@ -99,14 +99,29 @@ $(function() {
             },
             success: function(response) {
                 if (response.success) {
-                    // ✅ update badge color dynamically
-                    badge.text(newStatus.charAt(0).toUpperCase() + newStatus.slice(1));
-                    badge.removeClass().addClass('status-badge bg-' + getStatusClass(newStatus));
-                    toastr.success(response.message, 'Success');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Status updated successfully!',
+                        timer: 1500,
+                        showConfirmButton: true
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message,
+                    });
+                    button.prop('checked', !status);
                 }
             },
             error: function() {
-                toastr.error('Something went wrong while updating status!', 'Error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while updating the status.',
+                });
+                button.prop('checked', !status);
             }
         });
     });

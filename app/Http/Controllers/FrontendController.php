@@ -49,8 +49,8 @@ class FrontendController extends Controller
                 ]);
             }
 
-            // SweetAlert success via session
-            return redirect()->back()->with('success', 'Order submitted successfully!');
+            toast('Order submitted successfully!', 'success');
+            return redirect()->back();
 
         } catch (\Exception $e) {
             // Log error for debugging if needed
