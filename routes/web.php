@@ -6,6 +6,7 @@ use App\Http\Controllers\Dashboard\ConfigurationController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\MenuCategoryController;
 use App\Http\Controllers\Dashboard\MenuController;
+use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\FrontendController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -61,6 +62,9 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'dashboard'], function () {
     //menu start
     Route::resource('/menu', MenuController::class);
     //menu end
+    //order start
+    Route::resource('/order', OrderController::class);
+    Route::post('/order/status', [OrderController::class, 'updateStatus'])->name('order.updateStatus');
 
     Route::get('/site-settings', [ConfigurationController::class, 'getConfiguration'])->name('settings');
     Route::post('/site-settings', [ConfigurationController::class, 'postConfiguration'])->name('settings.update');
