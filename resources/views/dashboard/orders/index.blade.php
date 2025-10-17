@@ -1,8 +1,8 @@
 @extends('dashboard.layouts.app')
-
+{{-- 
 @push('css')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
-@endpush
+@endpush --}}
 
 @section('content')
 <div id="kt_app_content_container" class="app-container  container-xxl ">
@@ -11,7 +11,7 @@
                 <div class="card-title">
                     <!--begin::Search-->
                     <div class="d-flex align-items-center position-relative my-1">
-                        <h4>🧾 Tables with Unpaid Orders</h4>
+                        <h4>Tables with Unpaid Orders</h4>
                     </div>
                 </div>
         </div>
@@ -33,7 +33,7 @@
 @push('js')
 <script type="text/javascript">
 $(function () {
-    $('.yajra-datatable').DataTable({
+    var table = $('.yajra-datatable').DataTable({
         processing: true,
         serverSide: true,
         ajax: "{{ route('order.index') }}",

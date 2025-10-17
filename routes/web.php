@@ -7,6 +7,7 @@ use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\MenuCategoryController;
 use App\Http\Controllers\Dashboard\MenuController;
 use App\Http\Controllers\Dashboard\OrderController;
+use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\FrontendController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -66,6 +67,11 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'dashboard'], function () {
     Route::get('/orders/completed', [OrderController::class, 'completedOrders'])->name('order.completed');
 
     //order end
+
+    //user
+
+    Route::resource('user', UserController::class);
+    Route::post('user/role-permissions', [UserController::class, 'getPermissionsByRole'])->name('user.role.permissions');
 
     Route::get('/site-settings', [ConfigurationController::class, 'getConfiguration'])->name('settings');
     Route::post('/site-settings', [ConfigurationController::class, 'postConfiguration'])->name('settings.update');

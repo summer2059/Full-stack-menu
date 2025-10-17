@@ -1,21 +1,20 @@
 @extends('dashboard.layouts.app')
 
-@push('css')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
-@endpush
-
 @section('content')
-<div class="container py-4">
-    <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">✅ Completed Orders</h4>
-            <a href="{{ route('order.index') }}" class="btn btn-secondary">⬅ Back</a>
+<div id="kt_app_content_container" class="app-container  container-xxl ">
+    <div class="card">
+        <div class="card-header border-1 pt-6">
+            <div class="card-title">
+                <div class="d-flex align-items-center position-relative my-1">
+                    <h4>Copleted Orders</h4>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <table class="table yajra-datatable table-bordered">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
+        <div class="table-responsive theme-scrollbar">
+        <table id="example1" class="table yajra-datatable">
+            <thead>
+                <tr class="text-start text-black-500 fw-bold fs-7 text-uppercase gs-0">
+                        <th>SN</th>
                         <th>Menu</th>
                         <th>Quantity</th>
                         <th>Total Price</th>
@@ -30,11 +29,9 @@
 @endsection
 
 @push('js')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-<script>
+<script type="text/javascript">
 $(function () {
-    $('.yajra-datatable').DataTable({
+    var table = $('.yajra-datatable').DataTable({
         processing: true,
         serverSide: true,
         ajax: "{{ route('order.completed') }}",
