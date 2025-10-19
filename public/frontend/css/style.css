@@ -122,10 +122,10 @@ header h1 {
 }
 
 .menu-image {
-  width: 200px;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 50%;
+  width: 200px !important;
+  height: 200px !important;
+  object-fit: cover !important;
+  border-radius: 0px !important;
 }
 
 .menu-title {
@@ -297,14 +297,14 @@ body.dark .close-cart {
   border: 1px solid var(--border);
   padding: 20px;
   border-radius: 10px;
-  display: none;
+  display: none !important;
   width: 90%;
   max-width: 400px;
   z-index: 2000;
 }
 
 .checkout-form.active {
-  display: block;
+  display: block !important;
 }
 
 .checkout-form input,
