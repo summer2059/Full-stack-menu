@@ -2,8 +2,7 @@
 @section('title', 'Restaurant Menu')
 @section('content')
 
-<!-- Header -->
-
+<!-- test -->
 
 <!-- Category Bar -->
 <div class="category-bar d-flex flex-wrap justify-content-start px-3 py-2" id="category-bar">
