@@ -81,16 +81,20 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     });
     document.getElementById("checkout-total").textContent = total.toFixed(2);
-    checkoutForm.style.display = "block";
+    // checkoutForm.style.display = "block";
+    checkoutForm.classList.add("active");
   };
+  // Close Checkout
+  window.closeCheckout = function() {
+    checkoutForm.classList.remove("active");
+  };
+
+  
 
   window.closeCheckout = function () {
-    checkoutForm.style.display = "none";
+    checkoutForm.classList.remove("active");
   };
 
-  window.closeCart = function () {
-    cartBox.classList.remove("active");
-  };
 
   window.toggleMobileMenu = function () {
     const menu = document.getElementById("category-bar");
