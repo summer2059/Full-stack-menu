@@ -3,6 +3,9 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use Database\Seeders\Menu\MenuCategorySeeder;
+use Database\Seeders\Menu\MenuSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -20,5 +23,7 @@ class DatabaseSeeder extends Seeder
         // ]);
         $this->call(RolesAndPermissionsSeeder::class);
         $this->call(UsersSeeder::class);
+        $this->call(MenuCategorySeeder::class);
+        $this->call(MenuSeeder::class);
     }
 }

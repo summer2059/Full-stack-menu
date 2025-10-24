@@ -42,15 +42,6 @@
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-board"></use>
                             </svg><span>Dashboard </span></a>
                     </li>
-                    <li class="sidebar-list" style="{{ request()->routeIs('blog.index') ? 'background-color: #708090;' : '' }}"><i class="fa fa-thumb-tack"> </i><a
-                            class="sidebar-link sidebar-title link-nav" href="{{ route('blog.index') }}">
-                            <svg class="stroke-icon">
-                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-board"></use>
-                            </svg>
-                            <svg class="fill-icon">
-                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-board"></use>
-                            </svg><span>Blog </span></a>
-                    </li>
 
                     <li
                         class="sidebar-list {{ request()->routeIs('menu-category.index', 'menu-category.create', 'menu-category.edit', 'menu.index', 'menu.create', 'menu.edit') ? 'open' : '' }}">
@@ -69,6 +60,26 @@
                                     href="{{ route('menu-category.index') }}">Menu Category </a></li>
                             <li><a style="{{ request()->routeIs('menu.index', 'menu.create', 'menu.edit') ? 'background-color: #708090;' : '' }}"
                                     href="{{ route('menu.index') }}">Menu</a></li>
+                        </ul>
+                    </li>
+
+                    <li
+                        class="sidebar-list {{ request()->routeIs('menu-category.index', 'menu-category.create', 'menu-category.edit', 'menu.index', 'menu.create', 'menu.edit') ? 'open' : '' }}">
+                        <a class="sidebar-link sidebar-title" data-toggle="dropdown">
+                            <svg class="stroke-icon">
+                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-gallery"></use>
+                            </svg>
+                            <svg class="fill-icon">
+                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-gallery"></use>
+                            </svg>
+                            <span>Order</span>
+                        </a>
+                        <ul
+                            class="sidebar-submenu {{ request()->routeIs('order.index', 'order.byTable', 'order.completed') ? 'd-block' : '' }}">
+                            <li><a style="{{ request()->routeIs('order.index', 'order.byTable') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('order.index') }}">Order </a></li>
+                            <li><a style="{{ request()->routeIs('order.completed') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('order.completed') }}">Payed Order</a></li>
                         </ul>
                     </li>
 
