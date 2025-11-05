@@ -77,12 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("checkout-total").textContent = total.toFixed(2);
-<<<<<<< HEAD
-    checkoutForm.classList.add("active"); // smooth open
-=======
     // checkoutForm.style.display = "block";
     checkoutForm.classList.add("active");
->>>>>>> 3d412d6e7ae84f0c8501f20c06cb18a518206640
   };
   // Close Checkout
   window.closeCheckout = function() {
@@ -92,14 +88,9 @@ document.addEventListener("DOMContentLoaded", () => {
   
 
   window.closeCheckout = function () {
-<<<<<<< HEAD
-    checkoutForm.classList.remove("active"); // smooth close
-  };
-=======
     checkoutForm.classList.remove("active");
   };
 
->>>>>>> 3d412d6e7ae84f0c8501f20c06cb18a518206640
 
   // Mobile menu toggle
   window.toggleMobileMenu = function () {
