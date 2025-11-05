@@ -262,7 +262,7 @@ header {
 
 /* 💳 Checkout Modal */
 .checkout-form {
-  display: none;
+  /* display: none; */
   position: fixed;
   top: 50%;
   left: 50%;
