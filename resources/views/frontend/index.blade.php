@@ -1,9 +1,8 @@
 @extends('frontend.layouts.app')
+
 @section('title', 'Restaurant Menu')
+
 @section('content')
-
-<!-- Header -->
-
 
 <!-- Category Bar -->
 <div class="category-bar d-flex flex-wrap justify-content-start px-3 py-2" id="category-bar">
@@ -24,7 +23,9 @@
         <div class="col menu-card" data-category="{{ strtolower($item->menuCategory->title ?? 'uncategorized') }}">
             <div class="card h-100 text-center">
                 <div class="img-wrapper p-2">
-                    <img src="{{ asset('uploads/images/' . $item->image) }}" alt="{{ $item->title }}" class="menu-image rounded-circle mx-auto d-block">
+                    <img src="{{ asset('uploads/images/' . $item->image) }}" 
+                         alt="{{ $item->title }}" 
+                         class="menu-image mx-auto d-block">
                 </div>
                 <div class="card-body">
                     <h5 class="menu-title">{{ $item->title }}</h5>
@@ -40,7 +41,8 @@
                         @endif
                         <span class="discounted-price">NRs.{{ number_format($item->price, 0) }}</span>
                     </div>
-                    <button class="cart-btn btn btn-primary w-100" onclick="addToCart({{ $item->id }}, '{{ $item->title }}', {{ $item->price }})">
+                    <button class="cart-btn btn btn-primary w-100" 
+                            onclick="addToCart({{ $item->id }}, '{{ $item->title }}', {{ $item->price }})">
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                     </button>
                 </div>
@@ -49,6 +51,11 @@
     @endforeach
 </section>
 
-@include('frontend.component.cart')
-@include('frontend.component.checkout')
+@include('frontend.component.cart')      <!-- Sliding Cart Sidebar -->
+@include('frontend.component.checkout')  <!-- Smooth Checkout Modal -->
+
+@endsection  {{-- CLOSE content section first --}}
+
+@section('scripts')
+<script src="{{ asset('frontend/js/script.js') }}"></script>
 @endsection
