@@ -38,41 +38,39 @@ Route::controller(FrontendController::class)->group(function () {
 });
 
 Route::get('/dashboard/index', [App\Http\Controllers\HomeController::class, 'index'])->name('/dashboard/index');
-
 Route::group(['middleware' => ['auth'], 'prefix' => 'dashboard'], function () {
 
-    //toogle status
-    Route::post('/toggle-status/{model}/{id}', [CommonController::class, 'toggleStatus'])->name('toggle-status');
+    // toggle status
+    Route::post('/toggle-status/{model}/{id}', [CommonController::class, 'toggleStatus'])
+        ->name('toggle-status');
 
-    //index
+    // dashboard
     Route::get('/index', [DashboardController::class, 'index'])->name('index');
     Route::get('/update-account', [DashboardController::class, 'account'])->name('update-account');
     Route::post('/update-profile', [DashboardController::class, 'update'])->name('profile.update');
 
-    //menu category start
-    Route::resource('/menu-category', MenuCategoryController::class);
-    //menu category end
+    // menu category
+    Route::resource('menu-category', MenuCategoryController::class);
 
-    //menu start
-    Route::resource('/menu', MenuController::class);
-    //menu end
-    //order start
-    // Route::resource('/order', OrderController::class);
-    // Route::post('/order/status', [OrderController::class, 'updateStatus'])->name('order.updateStatus');
-    Route::get('/orders', [OrderController::class, 'index'])->name('order.index');
-    Route::get('/orders/table/{table_number}', [OrderController::class, 'showUnpaidOrdersByTable'])->name('order.byTable');
-    Route::post('/orders/mark-paid', [OrderController::class, 'markAllPaid'])->name('order.markAllPaid');
-    Route::post('/orders/update-status', [OrderController::class, 'updateStatus'])->name('order.updateStatus');
-    Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('order.destroy');
-    Route::get('/orders/completed', [OrderController::class, 'completedOrders'])->name('order.completed');
+    // menu
+    Route::resource('menu', MenuController::class);
 
-    //order end
+    // orders (GROUPED)
+    Route::prefix('orders')->name('order.')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::get('/table/{table_number}', [OrderController::class, 'showUnpaidOrdersByTable'])->name('byTable');
+        Route::post('/mark-paid', [OrderController::class, 'markAllPaid'])->name('markAllPaid');
+        Route::post('/update-status', [OrderController::class, 'updateStatus'])->name('updateStatus');
+        Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
+        Route::get('/completed', [OrderController::class, 'completedOrders'])->name('completed');
+    });
 
-    //user
-
+    // users
     Route::resource('user', UserController::class);
-    Route::post('user/role-permissions', [UserController::class, 'getPermissionsByRole'])->name('user.role.permissions');
+    Route::post('user/role-permissions', [UserController::class, 'getPermissionsByRole'])
+        ->name('user.role.permissions');
 
+    // settings
     Route::get('/site-settings', [ConfigurationController::class, 'getConfiguration'])->name('settings');
     Route::post('/site-settings', [ConfigurationController::class, 'postConfiguration'])->name('settings.update');
 });

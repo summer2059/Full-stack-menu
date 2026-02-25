@@ -59,5 +59,6 @@
     </div>
     @include('dashboard.layouts.partials.scripts')
     @stack('js')
+    @livewireScripts
   </body>
 </html>
