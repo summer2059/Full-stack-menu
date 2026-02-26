@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="index, nofollow">
-    <link rel="shortcut icon" href="{{asset('dashboard/assets/images/images.png')}}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{asset(getConfiguration('site_favicon'))}}" type="image/x-icon">
     <title>Admin Dashboard</title>
     <link rel="shortcut icon" href="#" type="image/x-icon">
     <!-- Google font-->
@@ -29,7 +29,7 @@
     <div class="page-wrapper compact-wrapper" id="pageWrapper">
       <div class="page-header row">
         <div class="header-logo-wrapper col-auto">
-          <div class="logo-wrapper"><a href="#"><img class="img-fluid for-light" src="{{asset('dashboard/assets/images/logo/logo.png')}}" alt=""><img class="img-fluid for-dark" src="{{asset('dashboard/assets/images/logo/logo_light.png')}}" alt=""></a></div>
+          <div class="logo-wrapper"><a href="#"><img class="img-fluid for-light" src="{{asset('dashboard/assets/images/logo/logo.png')}}" alt=""><img class="img-fluid for-dark" src="{{ asset(getConfiguration('site_logo')) }}" alt=""></a></div>
         </div>
         <div class="col-4 col-xl-4 page-title">
           <h4 class="f-w-700"> Admin Dashboard</h4>
@@ -59,5 +59,6 @@
     </div>
     @include('dashboard.layouts.partials.scripts')
     @stack('js')
+    @livewireScripts
   </body>
 </html>

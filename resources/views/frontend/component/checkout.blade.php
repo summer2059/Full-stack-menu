@@ -1,32 +1,65 @@
-<div class="checkout-form modal-dialog-centered modal-dialog-scrollable" id="checkout-form">
-  <div class="modal-content p-3 rounded shadow bg-light">
-    <h5 class="d-flex justify-content-between align-items-center">
-        Checkout
-        <button class="close-checkout btn btn-sm btn-outline-secondary" onclick="closeCheckout()">✖</button>
-    </h5>
-    <form id="order-form" method="POST" action="{{ route('order.submit') }}">
-        @csrf
-        <div class="mb-2">
-            <label class="form-label">Full Name:</label>
-            <input type="text" class="form-control" id="name" name="name" required>
-        </div>
-        <div class="mb-2">
-            <label class="form-label">Table Number:</label>
-            <input type="number" class="form-control" id="table" name="table" required min="1">
-        </div>
-        <div class="mb-2">
-            <label class="form-label">Phone (optional):</label>
-            <input type="text" class="form-control" id="phone" name="phone">
-        </div>
-        <div class="mb-2">
-            <label class="form-label">Special Instructions:</label>
-            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
-        </div>
-        <h6>Your Order:</h6>
-        <div id="checkout-items" class="mb-2"></div>
-        <p class="fw-bold">Total: NRs.<span id="checkout-total">0.00</span></p>
-        <button type="submit" class="btn btn-success w-100 mb-2">Confirm Order</button>
-        <button type="button" class="btn btn-secondary w-100" onclick="closeCheckout()">Cancel</button>
-    </form>
-  </div>
+{{-- ── Checkout Modal ── --}}
+<div class="checkout-form" id="checkout-form" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+    <div class="checkout-content">
+
+        <h5 id="checkout-title">
+            Place Order
+            <button class="close-checkout" onclick="closeCheckout()" aria-label="Close">✕</button>
+        </h5>
+
+        <form id="order-form" method="POST" action="{{ route('order.submit') }}">
+            @csrf
+
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" placeholder="Your name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="table">
+                    Table Number
+                    @if(!empty($tableNumber))
+                        <span class="table-verified-badge">
+                            <i class="fas fa-qrcode"></i> Scanned
+                        </span>
+                    @endif
+                </label>
+
+                @if(!empty($tableNumber))
+                    <div class="table-readonly-field">
+                        <i class="fas fa-chair"></i> Table {{ $tableNumber }}
+                    </div>
+                    <input type="hidden" name="table" value="{{ $tableNumber }}">
+                @else
+                    <input type="number" id="table" name="table" placeholder="e.g. 5" required min="1" value="{{ old('table') }}">
+                @endif
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone <span style="opacity:.5;font-weight:400">(optional)</span></label>
+                <input type="tel" id="phone" name="phone" placeholder="+977 98XXXXXXXX">
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Special Instructions</label>
+                <textarea id="notes" name="notes" rows="2" placeholder="Allergies, preferences…"></textarea>
+            </div>
+
+            {{-- Order Summary --}}
+            <div class="order-summary-box">
+                <h6>Your Order</h6>
+                <div id="checkout-items"></div>
+                <div class="checkout-total-row">
+                    <span>Total</span>
+                    <span>NRs.<span id="checkout-total-display">0.00</span></span>
+                </div>
+                {{-- hidden for form submit --}}
+                <span id="checkout-total" style="display:none">0.00</span>
+            </div>
+
+            <button type="submit" class="btn-submit">Confirm Order ✓</button>
+            <button type="button" class="btn-cancel" onclick="closeCheckout()">Cancel</button>
+
+        </form>
+    </div>
 </div>

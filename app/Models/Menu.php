@@ -20,4 +20,13 @@ class Menu extends Model
     {
         return $this->hasMany(Order::class);
     }
+    public function inventoryItems()
+    {
+        return $this->belongsToMany(
+            InventoryItems::class,
+            'menu_inventory',
+            'menu_id',
+            'inventory_item_id'
+        )->withPivot('quantity_required');
+    }
 }

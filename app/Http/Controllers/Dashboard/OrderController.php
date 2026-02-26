@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\CrudService;
+use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
@@ -57,10 +58,18 @@ class OrderController extends Controller
         $request->validate([
             'table_number' => 'required|integer'
         ]);
+        $inventoryService = app(InventoryService::class);
+        $orders = Order::where('table_number', $request->table_number)
+            ->where('status', '!=', 'payed')->get();
 
-        Order::where('table_number', $request->table_number)
-            ->where('status', '!=', 'payed')
-            ->update(['status' => 'payed']);
+        foreach ($orders as $order) {
+            $previousStatus = $order->status;
+            $order->status = 'payed';
+            $order->save();
+            if ($previousStatus !== 'payed') {
+                $inventoryService->deductForOrder($order);
+            }
+        }
 
         toast('All orders marked as paid!', 'success');
         return redirect()->route('order.index');
@@ -76,15 +85,32 @@ class OrderController extends Controller
     public function updateStatus(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:orders,id',
+            'id'     => 'required|exists:orders,id',
             'status' => 'required|in:pending,preparing,served,payed,cancelled'
         ]);
 
-        $order = Order::findOrFail($request->id);
+        $order          = Order::findOrFail($request->id);
+        $previousStatus = $order->status;
+
         $order->status = $request->status;
         $order->save();
 
-        return response()->json(['success' => true, 'message' => 'Order status updated successfully!']);
+        $inventoryService = app(InventoryService::class);
+
+        // Deduct when order is PAID
+        if ($request->status === 'payed' && $previousStatus !== 'payed') {
+            $inventoryService->deductForOrder($order);
+        }
+
+        // Restore stock if cancelled (only if it was already paid)
+        if ($request->status === 'cancelled' && $previousStatus === 'payed') {
+            $inventoryService->restoreForOrder($order);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order status updated!'
+        ]);
     }
     public function completedOrders(Request $request)
     {
