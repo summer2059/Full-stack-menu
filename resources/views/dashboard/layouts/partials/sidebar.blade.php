@@ -43,7 +43,7 @@
                             </svg><span>Dashboard </span></a>
                     </li>
                     <li
-                        class="sidebar-list {{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit', 'inventory.forecast') ? 'open' : '' }}">
+                        class="sidebar-list {{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit', 'inventory.forecast', 'recipe.index', 'recipe.edit') ? 'open' : '' }}">
                         <a class="sidebar-link sidebar-title" data-toggle="dropdown">
                             <svg class="stroke-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-gallery"></use>
@@ -54,11 +54,13 @@
                             <span>Inventory</span>
                         </a>
                         <ul
-                            class="sidebar-submenu {{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit', 'inventory.forecast') ? 'd-block' : '' }}">
+                            class="sidebar-submenu {{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit', 'inventory.forecast', 'recipe.index', 'recipe.edit') ? 'd-block' : '' }}">
                             <li><a style="{{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit') ? 'background-color: #708090;' : '' }}"
                                     href="{{ route('inventory.index') }}">Inventory </a></li>
                             <li><a style="{{ request()->routeIs('inventory.forecast') ? 'background-color: #708090;' : '' }}"
-                                    href="{{ route('menu.index') }}">Forcast</a></li>
+                                    href="{{ route('inventory.forecast') }}">Forecast</a></li>
+                            <li><a style="{{ request()->routeIs('recipe.index', 'recipe.edit') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('recipe.index') }}">Recipes</a></li>
                         </ul>
                     </li>
 
