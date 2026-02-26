@@ -1,16 +1,26 @@
-<aside class="cart position-fixed top-0 end-0 m-3 p-3 bg-light rounded shadow" id="cart">
-    <h2>
-        🛒
-        <button class="close-cart" onclick="closeCart()">✖</button>
-    </h2>
-    <div class="cart-items" id="cart-items"></div>
-    <div class="cart-summary">
-        Total: NRs.<span id="cart-total">0.00</span>
-        <button class="checkout" onclick="openCheckout()">Checkout</button>
+{{-- ── Cart Sidebar ── --}}
+<aside class="cart" id="cart" aria-label="Shopping Cart">
+
+    <div class="cart-header">
+        <h2>🛒 Your Cart</h2>
+        <button class="close-cart" onclick="closeCart()" aria-label="Close cart">✕</button>
     </div>
+
+    <div class="cart-items" id="cart-items">
+        <div class="cart-empty">
+            <span class="empty-icon">🍽️</span>
+            <p>Your cart is empty</p>
+        </div>
+    </div>
+
+    <div class="cart-footer">
+        <div class="cart-total-row">
+            <span class="cart-total-label">Total</span>
+            <span class="cart-total-amount">NRs.<span id="cart-total">0.00</span></span>
+        </div>
+        <button class="checkout" onclick="openCheckout()">
+            Proceed to Checkout →
+        </button>
+    </div>
+
 </aside>
-<script>
-    function closeCart() {
-        document.getElementById('cart').classList.remove('active');
-    }
-</script>

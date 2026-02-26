@@ -1,7 +1,14 @@
-<header class="d-flex justify-content-between align-items-center p-3 bg-primary text-white">
-    <h1 class="m-0">🍔 Restaurant Menu</h1>
-    <div class="actions d-flex gap-2 align-items-center">
-        <button class="toggle-cart btn btn-outline-light">🛒</button>
-        <button class="hamburger d-lg-none btn btn-outline-light" onclick="toggleMobileMenu()">ꕤ</button>
+<header>
+    <div class="header-brand">
+        <span class="logo-main">🍽 Bistro</span>
+        <span class="logo-sub">Fine Dining & Takeaway</span>
+    </div>
+
+    <div class="header-actions">
+        <button class="toggle-cart" aria-label="Open cart">
+            🛒 Cart
+            <span class="cart-badge" style="display:none">0</span>
+        </button>
+        {{-- <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">☰</button> --}}
     </div>
 </header>
