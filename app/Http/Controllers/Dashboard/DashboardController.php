@@ -10,6 +10,7 @@ use App\Models\Propertie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Crypt;
 
 class DashboardController extends Controller
 {
@@ -61,5 +62,16 @@ class DashboardController extends Controller
 
         // Redirect with a success message
         return redirect()->back()->with('status', 'Profile updated successfully!');
+    }
+    public function qrCodes()
+    {
+        $totalTables = 20; 
+        $tables = [];
+        for ($i = 1; $i <= $totalTables; $i++) {
+            $token = Crypt::encryptString((string) $i);
+            $tables[$i] = route('menu.table', ['token' => $token]);
+        }
+
+        return view('dashboard.qr-codes', compact('tables'));
     }
 }

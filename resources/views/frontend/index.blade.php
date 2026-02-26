@@ -17,7 +17,8 @@
 <div class="cart-backdrop" id="cart-backdrop"></div>
 
 @include('frontend.component.cart')
-@include('frontend.component.checkout')
+{{-- @include('frontend.component.checkout') --}}
+@include('frontend.component.checkout', ['tableNumber' => $tableNumber ?? null])
 
 @endsection
 

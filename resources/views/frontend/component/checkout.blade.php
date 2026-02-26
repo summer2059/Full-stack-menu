@@ -16,8 +16,23 @@
             </div>
 
             <div class="form-group">
-                <label for="table">Table Number</label>
-                <input type="number" id="table" name="table" placeholder="e.g. 5" required min="1">
+                <label for="table">
+                    Table Number
+                    @if(!empty($tableNumber))
+                        <span class="table-verified-badge">
+                            <i class="fas fa-qrcode"></i> Scanned
+                        </span>
+                    @endif
+                </label>
+
+                @if(!empty($tableNumber))
+                    <div class="table-readonly-field">
+                        <i class="fas fa-chair"></i> Table {{ $tableNumber }}
+                    </div>
+                    <input type="hidden" name="table" value="{{ $tableNumber }}">
+                @else
+                    <input type="number" id="table" name="table" placeholder="e.g. 5" required min="1" value="{{ old('table') }}">
+                @endif
             </div>
 
             <div class="form-group">

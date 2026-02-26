@@ -1,7 +1,7 @@
 <div class="sidebar-wrapper" data-layout="stroke-svg">
     <div>
         <div class="logo-wrapper "><a href="#"><img class="img-fluid logo_img"
-                    src="{{ asset('dashboard/assets/images/logo/logo_light.png') }}" alt=""></a>
+                    src="{{ asset(getConfiguration('site_logo')) }}" alt=""></a>
             <div class="back-btn"><i class="fa fa-angle-left"></i></div>
             <div class="toggle-sidebar">
                 <svg class="stroke-icon sidebar-toggle status_toggle middle">
@@ -13,13 +13,13 @@
             </div>
         </div>
         <div class="logo-icon-wrapper"><a href="#"><img class="img-fluid logo_icon"
-                    src="{{ asset('dashboard/assets/images/logo/logo_light.png') }}" alt=""></a></div>
+                    src="{{ asset(getConfiguration('site_logo')) }}" alt=""></a></div>
         <nav class="sidebar-main">
             <div class="left-arrow" id="left-arrow"><i data-feather="arrow-left"></i></div>
             <div id="sidebar-menu">
                 <ul class="sidebar-links" id="simple-bar">
                     <li class="back-btn"><a href="#"><img class="img-fluid logo_icon"
-                                src="{{ asset('dashboard/assets/images/logo/logo_light.png') }}" alt=""></a>
+                                src="{{ asset(getConfiguration('site_logo')) }}" alt=""></a>
                         <div class="mobile-back text-end"><span>Back</span><i class="fa fa-angle-right ps-2"
                                 aria-hidden="true"></i></div>
                     </li>
@@ -100,6 +100,16 @@
                             <li><a style="{{ request()->routeIs('order.completed') ? 'background-color: #708090;' : '' }}"
                                     href="{{ route('order.completed') }}">Payed Order</a></li>
                         </ul>
+                    </li>
+
+                    <li class="sidebar-list" style="{{ request()->routeIs('qr-codes') ? 'background-color: #708090;' : '' }}"><i class="fa fa-thumb-tack"> </i><a
+                            class="sidebar-link sidebar-title link-nav" href="{{ route('qr-codes') }}">
+                            <svg class="stroke-icon">
+                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-board"></use>
+                            </svg>
+                            <svg class="fill-icon">
+                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-board"></use>
+                            </svg><span>Qr Codes </span></a>
                     </li>
 
                     <li class="sidebar-list" style="{{ request()->routeIs('settings') ? 'background-color: #708090;' : '' }}"><i class="fa fa-thumb-tack"> </i><a

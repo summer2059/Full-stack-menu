@@ -26,6 +26,7 @@ Auth::routes([
 
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'index')->name('home-page');
+    Route::get('/{token}', 'index')->name('menu.table'); 
     Route::post('/submit-order', [FrontendController::class, 'submit'])->name('order.submit');
 });
 
@@ -57,6 +58,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'dashboard'], function () {
         Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
         Route::get('/completed', [OrderController::class, 'completedOrders'])->name('completed');
     });
+    Route::get('/qr-codes', [DashboardController::class, 'qrCodes'])->name('qr-codes');
 
     // inventory
     Route::prefix('inventory')->name('inventory.')->group(function () {
