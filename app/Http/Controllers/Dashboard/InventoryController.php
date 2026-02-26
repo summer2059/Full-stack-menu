@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Inventory\InventoryRequest;
 use App\Models\InventoryItems;
+use App\Models\InventoryLog;
 use App\Services\InventoryService;
 use App\Services\ForecastService;
 use Illuminate\Http\Request;
-use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
@@ -18,40 +19,13 @@ class InventoryController extends Controller
         protected ForecastService  $forecastService
     ) {}
 
-    public function index(Request $request)
+    public function index()
     {
-        if ($request->ajax()) {
-            $data = InventoryItems::all();
-
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->addColumn('stock_status', function ($item) {
-                    if ($item->current_stock <= 0) {
-                        return '<span class="stock-badge stock-low">Out of Stock</span>';
-                    } elseif ($item->isLowStock()) {
-                        return '<span class="stock-badge stock-warning">Low Stock</span>';
-                    }
-                    return '<span class="stock-badge stock-ok">✓ OK</span>';
-                })
-                ->addColumn('action', function ($item) {
-                    return '
-                        <a href="' . route('inventory.edit', $item->id) . '" class="btn btn-sm btn-primary">Edit</a>
-                        <button class="btn btn-sm btn-success restock-btn"
-                            data-id="' . $item->id . '"
-                            data-name="' . e($item->name) . '"
-                            data-unit="' . $item->unit . '">
-                            Restock
-                        </button>';
-                })
-                ->rawColumns(['stock_status', 'action'])
-                ->make(true);
-        }
-
-        $lowStock      = $this->inventoryService->getLowStockItems();
-        $totalItems    = InventoryItems::count();
-        $lowStockCount = $lowStock->count();
-        $stockValue    = InventoryItems::selectRaw('SUM(current_stock * cost_per_unit) as total')->value('total') ?? 0;
-        $todayUsageCount = \App\Models\InventoryLog::where('type', 'consumption')
+        $lowStock        = $this->inventoryService->getLowStockItems();
+        $totalItems      = InventoryItems::count();
+        $lowStockCount   = $lowStock->count();
+        $stockValue      = InventoryItems::selectRaw('SUM(current_stock * cost_per_unit) as total')->value('total') ?? 0;
+        $todayUsageCount = InventoryLog::where('type', 'consumption')
             ->whereDate('created_at', today())
             ->count();
 
@@ -65,17 +39,8 @@ class InventoryController extends Controller
         return view('dashboard.inventory.create');
     }
 
-    public function store(Request $request)
+    public function store(InventoryRequest $request)
     {
-        $request->validate([
-            'name'          => 'required|string|max:255',
-            'unit'          => 'required|string',
-            'current_stock' => 'required|numeric|min:0',
-            'minimum_stock' => 'nullable|numeric|min:0',
-            'cost_per_unit' => 'nullable|numeric|min:0',
-            'status'        => 'nullable|in:0,1',
-        ]);
-
         try {
             $item = InventoryItems::create([
                 'name'          => $request->name,
@@ -86,9 +51,8 @@ class InventoryController extends Controller
                 'status'        => $request->status ?? 1,
             ]);
 
-            // Log opening stock
             if ($item->current_stock > 0) {
-                \App\Models\InventoryLog::create([
+                InventoryLog::create([
                     'inventory_item_id' => $item->id,
                     'type'              => 'restock',
                     'quantity'          => $item->current_stock,
@@ -118,17 +82,8 @@ class InventoryController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(InventoryRequest $request, $id)
     {
-        $request->validate([
-            'name'          => 'required|string|max:255',
-            'unit'          => 'required|string',
-            'current_stock' => 'required|numeric|min:0',
-            'minimum_stock' => 'nullable|numeric|min:0',
-            'cost_per_unit' => 'nullable|numeric|min:0',
-            'status'        => 'nullable|in:0,1',
-        ]);
-
         try {
             $item = InventoryItems::findOrFail($id);
             $item->update([
@@ -163,7 +118,6 @@ class InventoryController extends Controller
                 $request->quantity,
                 $request->note
             );
-
             toast('Stock restocked successfully!', 'success');
         } catch (Exception $e) {
             Log::error('Restock error: ' . $e->getMessage());
@@ -184,11 +138,12 @@ class InventoryController extends Controller
         }
         return redirect()->route('inventory.index');
     }
+
     public function forecast()
     {
-        $forecast    = $this->forecastService->forecastTomorrow();
-        $needed      = $this->forecastService->inventoryNeededForTomorrow();
-        $comparison  = $this->forecastService->todayVsYesterday();
+        $forecast   = $this->forecastService->forecastTomorrow();
+        $needed     = $this->forecastService->inventoryNeededForTomorrow();
+        $comparison = $this->forecastService->todayVsYesterday();
 
         return view('dashboard.inventory.forecast', compact('forecast', 'needed', 'comparison'));
     }
