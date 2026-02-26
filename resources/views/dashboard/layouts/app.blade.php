@@ -18,6 +18,7 @@
             width: 32px;
         }
     </style>
+    @livewireStyles
     @stack('css')
   </head>
   <body>
