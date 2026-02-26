@@ -42,6 +42,25 @@
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-board"></use>
                             </svg><span>Dashboard </span></a>
                     </li>
+                    <li
+                        class="sidebar-list {{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit', 'inventory.forecast') ? 'open' : '' }}">
+                        <a class="sidebar-link sidebar-title" data-toggle="dropdown">
+                            <svg class="stroke-icon">
+                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-gallery"></use>
+                            </svg>
+                            <svg class="fill-icon">
+                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-gallery"></use>
+                            </svg>
+                            <span>Inventory</span>
+                        </a>
+                        <ul
+                            class="sidebar-submenu {{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit', 'inventory.forecast') ? 'd-block' : '' }}">
+                            <li><a style="{{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('inventory.index') }}">Inventory </a></li>
+                            <li><a style="{{ request()->routeIs('inventory.forecast') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('menu.index') }}">Forcast</a></li>
+                        </ul>
+                    </li>
 
                     <li
                         class="sidebar-list {{ request()->routeIs('menu-category.index', 'menu-category.create', 'menu-category.edit', 'menu.index', 'menu.create', 'menu.edit') ? 'open' : '' }}">
