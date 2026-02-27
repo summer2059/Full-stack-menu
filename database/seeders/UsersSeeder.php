@@ -2,48 +2,61 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class UsersSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $users = [
             [
-                'name' => 'Admin User',
-                'email' => 'admin@example.com',
+                'name'     => 'Admin',
+                'email'    => 'admin@restaurant.com',
                 'password' => bcrypt('password'),
-                'role' => 'admin'
+                'role'     => 'admin',
             ],
             [
-                'name' => 'Reception User',
-                'email' => 'reception@example.com',
+                'name'     => 'Manager',
+                'email'    => 'manager@restaurant.com',
                 'password' => bcrypt('password'),
-                'role' => 'reception'
+                'role'     => 'manager',
             ],
             [
-                'name' => 'Kitchen Chief User',
-                'email' => 'kitchen@example.com',
+                'name'     => 'Reception',
+                'email'    => 'reception@restaurant.com',
                 'password' => bcrypt('password'),
-                'role' => 'kitchen_chief'
+                'role'     => 'reception',
             ],
             [
-                'name' => 'Food Server User',
-                'email' => 'server@example.com',
+                'name'     => 'Kitchen Staff',
+                'email'    => 'kitchen@restaurant.com',
                 'password' => bcrypt('password'),
-                'role' => 'food_server'
+                'role'     => 'kitchen_staff',
+            ],
+            [
+                'name'     => 'Food Server',
+                'email'    => 'server@restaurant.com',
+                'password' => bcrypt('password'),
+                'role'     => 'food_server',
+            ],
+            [
+                'name'     => 'Inventory Manager',
+                'email'    => 'inventory@restaurant.com',
+                'password' => bcrypt('password'),
+                'role'     => 'inventory_manager',
             ],
         ];
 
-        foreach ($users as $userData) {
+        foreach ($users as $data) {
             $user = User::firstOrCreate(
-                ['email' => $userData['email']],
-                ['name' => $userData['name'], 'password' => $userData['password']]
+                ['email' => $data['email']],
+                [
+                    'name'     => $data['name'],
+                    'password' => $data['password'],
+                ]
             );
-            $user->assignRole($userData['role']);
+            $user->syncRoles([$data['role']]);
         }
-
-        $this->command->info('Users seeded successfully!');
     }
 }

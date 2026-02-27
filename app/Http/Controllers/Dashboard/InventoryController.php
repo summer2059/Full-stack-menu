@@ -34,26 +34,48 @@ class InventoryController extends Controller
                     return '<span class="stock-badge stock-ok">✓ OK</span>';
                 })
                 ->addColumn('action', function ($item) {
-                    return '
-                        <a href="' . route('inventory.edit', $item->id) . '" class="btn btn-sm btn-primary">Edit</a>
-                        <button class="btn btn-sm btn-success restock-btn"
-                            data-id="' . $item->id . '"
+                    $buttons = '';
+
+                    // EDIT — inventory_manager + admin
+                    if (auth()->user()->can('inventory.update')) {
+                        $buttons .= '<a href="' . route('inventory.edit', $item->id) . '"
+                            class="btn btn-sm btn-primary me-1">
+                            <i class="fa fa-pencil me-1"></i>Edit
+                        </a>';
+                    }
+
+                    // RESTOCK — inventory_manager + admin
+                    if (auth()->user()->can('inventory.restock')) {
+                        $buttons .= '<button class="btn btn-sm btn-success me-1 restock-btn"
+                            data-id="'   . $item->id   . '"
                             data-name="' . e($item->name) . '"
                             data-unit="' . $item->unit . '">
-                            Restock
+                            <i class="fa fa-plus me-1"></i>Restock
                         </button>';
+                    }
+
+                    // DELETE — admin only
+                    if (auth()->user()->can('inventory.delete')) {
+                        $buttons .= '<a href="' . route('inventory.destroy', $item->id) . '"
+                            class="btn btn-sm btn-danger"
+                            data-confirm-delete="true">
+                            <i class="fa fa-trash me-1"></i>Delete
+                        </a>';
+                    }
+
+                    return $buttons ?: '<span class="text-muted small">View only</span>';
                 })
                 ->rawColumns(['stock_status', 'action'])
                 ->make(true);
         }
 
-        $lowStock      = $this->inventoryService->getLowStockItems();
-        $totalItems    = InventoryItems::count();
-        $lowStockCount = $lowStock->count();
-        $stockValue    = InventoryItems::selectRaw('SUM(current_stock * cost_per_unit) as total')->value('total') ?? 0;
+        $lowStock        = $this->inventoryService->getLowStockItems();
+        $totalItems      = InventoryItems::count();
+        $lowStockCount   = $lowStock->count();
+        $stockValue      = InventoryItems::selectRaw('SUM(current_stock * cost_per_unit) as total')->value('total') ?? 0;
         $todayUsageCount = \App\Models\InventoryLog::where('type', 'consumption')
-            ->whereDate('created_at', today())
-            ->count();
+                            ->whereDate('created_at', today())
+                            ->count();
 
         return view('dashboard.inventory.index', compact(
             'lowStock', 'totalItems', 'lowStockCount', 'stockValue', 'todayUsageCount'
@@ -62,7 +84,7 @@ class InventoryController extends Controller
 
     public function create()
     {
-        return view('dashboard.inventory.create');
+        return view('dashboard.inventory.form');
     }
 
     public function store(Request $request)
@@ -86,7 +108,6 @@ class InventoryController extends Controller
                 'status'        => $request->status ?? 1,
             ]);
 
-            // Log opening stock
             if ($item->current_stock > 0) {
                 \App\Models\InventoryLog::create([
                     'inventory_item_id' => $item->id,
@@ -110,7 +131,7 @@ class InventoryController extends Controller
     {
         try {
             $item = InventoryItems::findOrFail($id);
-            return view('dashboard.inventory.edit', compact('item'));
+            return view('dashboard.inventory.form', compact('item'));
         } catch (Exception $e) {
             Log::error('Inventory edit error: ' . $e->getMessage());
             toast('Item not found.', 'error');
@@ -163,7 +184,6 @@ class InventoryController extends Controller
                 $request->quantity,
                 $request->note
             );
-
             toast('Stock restocked successfully!', 'success');
         } catch (Exception $e) {
             Log::error('Restock error: ' . $e->getMessage());
@@ -184,11 +204,12 @@ class InventoryController extends Controller
         }
         return redirect()->route('inventory.index');
     }
+
     public function forecast()
     {
-        $forecast    = $this->forecastService->forecastTomorrow();
-        $needed      = $this->forecastService->inventoryNeededForTomorrow();
-        $comparison  = $this->forecastService->todayVsYesterday();
+        $forecast   = $this->forecastService->forecastTomorrow();
+        $needed     = $this->forecastService->inventoryNeededForTomorrow();
+        $comparison = $this->forecastService->todayVsYesterday();
 
         return view('dashboard.inventory.forecast', compact('forecast', 'needed', 'comparison'));
     }

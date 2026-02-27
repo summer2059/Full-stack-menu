@@ -1,6 +1,6 @@
 <div class="sidebar-wrapper" data-layout="stroke-svg">
     <div>
-        <div class="logo-wrapper "><a href="#"><img class="img-fluid logo_img"
+        <div class="logo-wrapper"><a href="#"><img class="img-fluid logo_img"
                     src="{{ asset(getConfiguration('site_logo')) }}" alt=""></a>
             <div class="back-btn"><i class="fa fa-angle-left"></i></div>
             <div class="toggle-sidebar">
@@ -24,26 +24,36 @@
                                 aria-hidden="true"></i></div>
                     </li>
                     <li class="pin-title sidebar-main-title">
-                        <div>
-                            <h6>Pinned</h6>
-                        </div>
+                        <div><h6>Pinned</h6></div>
                     </li>
                     <li class="sidebar-main-title">
-                        <div>
-                            <h6 class="lan-1">General</h6>
-                        </div>
+                        <div><h6 class="lan-1">General</h6></div>
                     </li>
-                    <li class="sidebar-list" style="{{ request()->routeIs('index') ? 'background-color: #708090;' : '' }}"><i class="fa fa-thumb-tack"> </i><a
-                            class="sidebar-link sidebar-title link-nav" href="{{ route('index') }}">
+
+                    {{-- ═══════════════════════════════════════════════
+                         DASHBOARD — all roles
+                    ════════════════════════════════════════════════ --}}
+                    @can('dashboard.view')
+                    <li class="sidebar-list" style="{{ request()->routeIs('index') ? 'background-color: #708090;' : '' }}">
+                        <i class="fa fa-thumb-tack"></i>
+                        <a class="sidebar-link sidebar-title link-nav" href="{{ route('index') }}">
                             <svg class="stroke-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-board"></use>
                             </svg>
                             <svg class="fill-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-board"></use>
-                            </svg><span>Dashboard </span></a>
+                            </svg>
+                            <span>Dashboard</span>
+                        </a>
                     </li>
-                    <li
-                        class="sidebar-list {{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit', 'inventory.forecast', 'recipe.index', 'recipe.edit') ? 'open' : '' }}">
+                    @endcan
+
+                    {{-- ═══════════════════════════════════════════════
+                         INVENTORY — manager + inventory_manager
+                         Sub-items gated individually
+                    ════════════════════════════════════════════════ --}}
+                    @canany(['inventory.view', 'inventory.forecast', 'recipe.view'])
+                    <li class="sidebar-list {{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit', 'inventory.forecast', 'recipe.index', 'recipe.edit') ? 'open' : '' }}">
                         <a class="sidebar-link sidebar-title" data-toggle="dropdown">
                             <svg class="stroke-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-gallery"></use>
@@ -53,19 +63,39 @@
                             </svg>
                             <span>Inventory</span>
                         </a>
-                        <ul
-                            class="sidebar-submenu {{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit', 'inventory.forecast', 'recipe.index', 'recipe.edit') ? 'd-block' : '' }}">
-                            <li><a style="{{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit') ? 'background-color: #708090;' : '' }}"
-                                    href="{{ route('inventory.index') }}">Inventory </a></li>
-                            <li><a style="{{ request()->routeIs('inventory.forecast') ? 'background-color: #708090;' : '' }}"
-                                    href="{{ route('inventory.forecast') }}">Forecast</a></li>
-                            <li><a style="{{ request()->routeIs('recipe.index', 'recipe.edit') ? 'background-color: #708090;' : '' }}"
-                                    href="{{ route('recipe.index') }}">Recipes</a></li>
+                        <ul class="sidebar-submenu {{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit', 'inventory.forecast', 'recipe.index', 'recipe.edit') ? 'd-block' : '' }}">
+
+                            @can('inventory.view')
+                            <li>
+                                <a style="{{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('inventory.index') }}">Inventory</a>
+                            </li>
+                            @endcan
+
+                            @can('inventory.forecast')
+                            <li>
+                                <a style="{{ request()->routeIs('inventory.forecast') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('inventory.forecast') }}">Forecast</a>
+                            </li>
+                            @endcan
+
+                            @can('recipe.view')
+                            <li>
+                                <a style="{{ request()->routeIs('recipe.index', 'recipe.edit') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('recipe.index') }}">Recipes</a>
+                            </li>
+                            @endcan
+
                         </ul>
                     </li>
+                    @endcanany
 
-                    <li
-                        class="sidebar-list {{ request()->routeIs('menu-category.index', 'menu-category.create', 'menu-category.edit', 'menu.index', 'menu.create', 'menu.edit') ? 'open' : '' }}">
+                    {{-- ═══════════════════════════════════════════════
+                         MENU — manager, reception, kitchen, food_server
+                         Sub-items gated individually
+                    ════════════════════════════════════════════════ --}}
+                    @can('menu_category.view')
+                    <li class="sidebar-list {{ request()->routeIs('menu-category.index', 'menu-category.create', 'menu-category.edit', 'menu.index', 'menu.create', 'menu.edit') ? 'open' : '' }}">
                         <a class="sidebar-link sidebar-title" data-toggle="dropdown">
                             <svg class="stroke-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-gallery"></use>
@@ -75,17 +105,32 @@
                             </svg>
                             <span>Menu</span>
                         </a>
-                        <ul
-                            class="sidebar-submenu {{ request()->routeIs('menu-category.index', 'menu-category.create', 'menu-category.edit', 'menu.index', 'menu.create', 'menu.edit') ? 'd-block' : '' }}">
-                            <li><a style="{{ request()->routeIs('menu-category.index', 'menu-category.create', 'menu-category.edit') ? 'background-color: #708090;' : '' }}"
-                                    href="{{ route('menu-category.index') }}">Menu Category </a></li>
-                            <li><a style="{{ request()->routeIs('menu.index', 'menu.create', 'menu.edit') ? 'background-color: #708090;' : '' }}"
-                                    href="{{ route('menu.index') }}">Menu</a></li>
+                        <ul class="sidebar-submenu {{ request()->routeIs('menu-category.index', 'menu-category.create', 'menu-category.edit', 'menu.index', 'menu.create', 'menu.edit') ? 'd-block' : '' }}">
+
+                            @can('menu_category.view')
+                            <li>
+                                <a style="{{ request()->routeIs('menu-category.index', 'menu-category.create', 'menu-category.edit') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('menu-category.index') }}">Menu Category</a>
+                            </li>
+                            @endcan
+
+                            @can('menu.view')
+                            <li>
+                                <a style="{{ request()->routeIs('menu.index', 'menu.create', 'menu.edit') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('menu.index') }}">Menu</a>
+                            </li>
+                            @endcan
+
                         </ul>
                     </li>
+                    @endcan
 
-                    <li
-                        class="sidebar-list {{ request()->routeIs('menu-category.index', 'menu-category.create', 'menu-category.edit', 'menu.index', 'menu.create', 'menu.edit') ? 'open' : '' }}">
+                    {{-- ═══════════════════════════════════════════════
+                         ORDERS — all roles except inventory_manager
+                         Sub-items gated individually
+                    ════════════════════════════════════════════════ --}}
+                    @can('order.view')
+                    <li class="sidebar-list {{ request()->routeIs('order.index', 'order.byTable', 'order.completed') ? 'open' : '' }}">
                         <a class="sidebar-link sidebar-title" data-toggle="dropdown">
                             <svg class="stroke-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-gallery"></use>
@@ -93,47 +138,76 @@
                             <svg class="fill-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-gallery"></use>
                             </svg>
-                            <span>Order</span>
+                            <span>Orders</span>
                         </a>
-                        <ul
-                            class="sidebar-submenu {{ request()->routeIs('order.index', 'order.byTable', 'order.completed') ? 'd-block' : '' }}">
-                            <li><a style="{{ request()->routeIs('order.index', 'order.byTable') ? 'background-color: #708090;' : '' }}"
-                                    href="{{ route('order.index') }}">Order </a></li>
-                            <li><a style="{{ request()->routeIs('order.completed') ? 'background-color: #708090;' : '' }}"
-                                    href="{{ route('order.completed') }}">Payed Order</a></li>
+                        <ul class="sidebar-submenu {{ request()->routeIs('order.index', 'order.byTable', 'order.completed') ? 'd-block' : '' }}">
+
+                            <li>
+                                <a style="{{ request()->routeIs('order.index', 'order.byTable') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('order.index') }}">Active Orders</a>
+                            </li>
+
+                            @can('order.view_completed')
+                            <li>
+                                <a style="{{ request()->routeIs('order.completed') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('order.completed') }}">Paid Orders</a>
+                            </li>
+                            @endcan
+
                         </ul>
                     </li>
+                    @endcan
 
-                    <li class="sidebar-list" style="{{ request()->routeIs('qr-codes') ? 'background-color: #708090;' : '' }}"><i class="fa fa-thumb-tack"> </i><a
-                            class="sidebar-link sidebar-title link-nav" href="{{ route('qr-codes') }}">
+                    {{-- ═══════════════════════════════════════════════
+                         QR CODES — admin, manager, reception
+                    ════════════════════════════════════════════════ --}}
+                    @can('qr_code.view')
+                    <li class="sidebar-list" style="{{ request()->routeIs('qr-codes') ? 'background-color: #708090;' : '' }}">
+                        <i class="fa fa-thumb-tack"></i>
+                        <a class="sidebar-link sidebar-title link-nav" href="{{ route('qr-codes') }}">
                             <svg class="stroke-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-board"></use>
                             </svg>
                             <svg class="fill-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-board"></use>
-                            </svg><span>Qr Codes </span></a>
+                            </svg>
+                            <span>QR Codes</span>
+                        </a>
                     </li>
+                    @endcan
 
-                    <li class="sidebar-list" style="{{ request()->routeIs('settings') ? 'background-color: #708090;' : '' }}"><i class="fa fa-thumb-tack"> </i><a
-                            class="sidebar-link sidebar-title link-nav" href="{{ route('settings') }}">
+                    {{-- ═══════════════════════════════════════════════
+                         SITE SETTINGS — admin only
+                    ════════════════════════════════════════════════ --}}
+                    @can('site_setting.view')
+                    <li class="sidebar-list" style="{{ request()->routeIs('settings') ? 'background-color: #708090;' : '' }}">
+                        <i class="fa fa-thumb-tack"></i>
+                        <a class="sidebar-link sidebar-title link-nav" href="{{ route('settings') }}">
                             <svg class="stroke-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-board"></use>
                             </svg>
                             <svg class="fill-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-board"></use>
-                            </svg><span>Site Settings </span></a>
+                            </svg>
+                            <span>Site Settings</span>
+                        </a>
                     </li>
-
-                    <li class="sidebar-list" style="{{ request()->routeIs('user.index') ? 'background-color: #708090;' : '' }}"><i class="fa fa-thumb-tack"> </i><a
-                            class="sidebar-link sidebar-title link-nav" href="{{ route('user.index') }}">
+                    @endcan
+                    @can('user.view')
+                    <li class="sidebar-list" style="{{ request()->routeIs('user.index') ? 'background-color: #708090;' : '' }}">
+                        <i class="fa fa-thumb-tack"></i>
+                        <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.index') }}">
                             <svg class="stroke-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-board"></use>
                             </svg>
                             <svg class="fill-icon">
                                 <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-board"></use>
-                            </svg><span>User Management </span></a>
+                            </svg>
+                            <span>User Management</span>
+                        </a>
                     </li>
-                    
+                    @endcan
+
                 </ul>
             </div>
             <div class="right-arrow" id="right-arrow"><i data-feather="arrow-right"></i></div>

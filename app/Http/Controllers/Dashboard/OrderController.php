@@ -17,13 +17,13 @@ class OrderController extends Controller
     public function __construct(CrudService $crudService)
     {
         $this->crudService = $crudService;
-        $this->modelName = 'order';
+        $this->modelName   = 'order';
     }
 
     public function index(Request $request)
     {
         $title = 'Delete Order!';
-        $text = "Are you sure you want to delete?";
+        $text  = 'Are you sure you want to delete?';
         confirmDelete($title, $text);
 
         if ($request->ajax()) {
@@ -34,8 +34,25 @@ class OrderController extends Controller
 
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('action', function ($data) {
-                    return '<a href="' . route('order.byTable', $data->table_number) . '" class="btn btn-sm btn-primary">View</a>';
+                ->addColumn('action', function ($row) {
+                    $buttons = '';
+
+                    // VIEW TABLE — all roles with order.view
+                    $buttons .= '<a href="' . route('order.byTable', $row->table_number) . '"
+                        class="btn btn-sm btn-primary me-1">
+                        <i class="fa fa-eye me-1"></i>View
+                    </a>';
+
+                    // DELETE — manager + admin
+                    if (auth()->user()->can('order.delete')) {
+                        $buttons .= '<a href="' . route('order.destroy', $row->table_number) . '"
+                            class="btn btn-sm btn-danger"
+                            data-confirm-delete="true">
+                            <i class="fa fa-trash me-1"></i>Delete
+                        </a>';
+                    }
+
+                    return $buttons;
                 })
                 ->make(true);
         }
@@ -55,16 +72,15 @@ class OrderController extends Controller
 
     public function markAllPaid(Request $request)
     {
-        $request->validate([
-            'table_number' => 'required|integer'
-        ]);
+        $request->validate(['table_number' => 'required|integer']);
+
         $inventoryService = app(InventoryService::class);
         $orders = Order::where('table_number', $request->table_number)
             ->where('status', '!=', 'payed')->get();
 
         foreach ($orders as $order) {
             $previousStatus = $order->status;
-            $order->status = 'payed';
+            $order->status  = 'payed';
             $order->save();
             if ($previousStatus !== 'payed') {
                 $inventoryService->deductForOrder($order);
@@ -86,7 +102,7 @@ class OrderController extends Controller
     {
         $request->validate([
             'id'     => 'required|exists:orders,id',
-            'status' => 'required|in:pending,preparing,served,payed,cancelled'
+            'status' => 'required|in:pending,preparing,served,payed,cancelled',
         ]);
 
         $order          = Order::findOrFail($request->id);
@@ -97,21 +113,17 @@ class OrderController extends Controller
 
         $inventoryService = app(InventoryService::class);
 
-        // Deduct when order is PAID
         if ($request->status === 'payed' && $previousStatus !== 'payed') {
             $inventoryService->deductForOrder($order);
         }
 
-        // Restore stock if cancelled (only if it was already paid)
         if ($request->status === 'cancelled' && $previousStatus === 'payed') {
             $inventoryService->restoreForOrder($order);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Order status updated!'
-        ]);
+        return response()->json(['success' => true, 'message' => 'Order status updated!']);
     }
+
     public function completedOrders(Request $request)
     {
         if ($request->ajax()) {
@@ -122,10 +134,8 @@ class OrderController extends Controller
 
             return DataTables::of($orders)
                 ->addIndexColumn()
-                ->addColumn('menu', fn($data) => $data->menu->title ?? 'N/A')
-                ->addColumn('status', function ($data) {
-                    return '<span class="badge bg-primary">Payed</span>';
-                })
+                ->addColumn('menu', fn($row) => $row->menu->title ?? 'N/A')
+                ->addColumn('status', fn($row) => '<span class="badge bg-primary">Payed</span>')
                 ->rawColumns(['status'])
                 ->make(true);
         }

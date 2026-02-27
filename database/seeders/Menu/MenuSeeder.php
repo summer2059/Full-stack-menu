@@ -4,83 +4,139 @@ namespace Database\Seeders\Menu;
 
 use App\Models\Menu;
 use App\Models\MenuCategory;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class MenuSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $food = MenuCategory::where('slug', 'food')->first();
-        $drinks = MenuCategory::where('slug', 'drinks')->first();
-        $desserts = MenuCategory::where('slug', 'desserts')->first();
+        $cats = MenuCategory::pluck('id', 'slug');
 
         $menus = [
-            // Food
-            [
-                'title' => 'Cheese Burger',
-                'slug' => 'cheese-burger',
-                'description' => 'A juicy beef patty with melted cheese and fresh toppings.',
-                'image' => 'https://source.unsplash.com/400x300/?burger',
-                'price' => 599,
-                'rating' => 4,
-                'priority' => 1,
-                'status' => 1,
-                'menu_category_id' => $food?->id,
-            ],
-            [
-                'title' => 'Veg Pizza',
-                'slug' => 'veg-pizza',
-                'description' => 'Loaded with fresh vegetables and mozzarella cheese.',
-                'image' => 'https://source.unsplash.com/400x300/?pizza',
-                'price' => 749,
-                'rating' => 5,
-                'priority' => 2,
-                'status' => 1,
-                'menu_category_id' => $food?->id,
-            ],
-            // Drinks
-            [
-                'title' => 'Cappuccino',
-                'slug' => 'cappuccino',
-                'description' => 'Classic Italian coffee with steamed milk foam.',
-                'image' => 'https://source.unsplash.com/400x300/?coffee',
-                'price' => 350,
-                'rating' => 4,
-                'priority' => 1,
-                'status' => 1,
-                'menu_category_id' => $drinks?->id,
-            ],
-            [
-                'title' => 'Orange Juice',
-                'slug' => 'orange-juice',
-                'description' => 'Freshly squeezed orange juice.',
-                'image' => 'https://source.unsplash.com/400x300/?juice',
-                'price' => 280,
-                'rating' => 3,
-                'priority' => 2,
-                'status' => 1,
-                'menu_category_id' => $drinks?->id,
-            ],
-            // Desserts
-            [
-                'title' => 'Chocolate Cake',
-                'slug' => 'chocolate-cake',
-                'description' => 'Moist chocolate cake with ganache topping.',
-                'image' => 'https://source.unsplash.com/400x300/?chocolate-cake',
-                'price' => 450,
-                'rating' => 5,
-                'priority' => 1,
-                'status' => 1,
-                'menu_category_id' => $desserts?->id,
-            ],
+
+            // ── BURGERS (10) ───────────────────────────────────────────────
+            ['title'=>'Classic Beef Burger',      'slug'=>'classic-beef-burger',      'description'=>'Pure beef patty with lettuce, tomato & pickles.',           'image'=>'https://source.unsplash.com/400x300/?burger',         'price'=>599,  'rating'=>4,'priority'=>1, 'status'=>1,'menu_category_id'=>$cats['burgers']],
+            ['title'=>'Cheese Burger',             'slug'=>'cheese-burger',             'description'=>'Melted cheddar on a juicy beef patty.',                     'image'=>'https://source.unsplash.com/400x300/?cheeseburger',   'price'=>649,  'rating'=>5,'priority'=>2, 'status'=>1,'menu_category_id'=>$cats['burgers']],
+            ['title'=>'Double Smash Burger',       'slug'=>'double-smash-burger',       'description'=>'Two smashed patties, special sauce, double cheese.',        'image'=>'https://source.unsplash.com/400x300/?smashburger',    'price'=>849,  'rating'=>5,'priority'=>3, 'status'=>1,'menu_category_id'=>$cats['burgers']],
+            ['title'=>'Crispy Chicken Burger',     'slug'=>'crispy-chicken-burger',     'description'=>'Buttermilk-fried chicken, coleslaw, pickles.',              'image'=>'https://source.unsplash.com/400x300/?chickenburger',  'price'=>699,  'rating'=>4,'priority'=>4, 'status'=>1,'menu_category_id'=>$cats['burgers']],
+            ['title'=>'Spicy Jalapeño Burger',     'slug'=>'spicy-jalapeno-burger',     'description'=>'Beef patty with jalapeños, pepper jack & sriracha mayo.',   'image'=>'https://source.unsplash.com/400x300/?spicyburger',    'price'=>749,  'rating'=>4,'priority'=>5, 'status'=>1,'menu_category_id'=>$cats['burgers']],
+            ['title'=>'BBQ Bacon Burger',          'slug'=>'bbq-bacon-burger',          'description'=>'Smoky BBQ sauce, crispy bacon, caramelised onions.',        'image'=>'https://source.unsplash.com/400x300/?baconburger',    'price'=>799,  'rating'=>5,'priority'=>6, 'status'=>1,'menu_category_id'=>$cats['burgers']],
+            ['title'=>'Mushroom Swiss Burger',     'slug'=>'mushroom-swiss-burger',     'description'=>'Sautéed mushrooms and Swiss cheese on a beef patty.',       'image'=>'https://source.unsplash.com/400x300/?mushroomburger', 'price'=>749,  'rating'=>4,'priority'=>7, 'status'=>1,'menu_category_id'=>$cats['burgers']],
+            ['title'=>'Veggie Bean Burger',        'slug'=>'veggie-bean-burger',        'description'=>'Black bean patty with avocado, lettuce & tomato.',          'image'=>'https://source.unsplash.com/400x300/?veggieburger',   'price'=>599,  'rating'=>3,'priority'=>8, 'status'=>1,'menu_category_id'=>$cats['burgers']],
+            ['title'=>'Truffle Burger',            'slug'=>'truffle-burger',            'description'=>'Wagyu patty with truffle mayo and arugula.',                'image'=>'https://source.unsplash.com/400x300/?truffleburger',  'price'=>1099, 'rating'=>5,'priority'=>9, 'status'=>1,'menu_category_id'=>$cats['burgers']],
+            ['title'=>'Fish Fillet Burger',        'slug'=>'fish-fillet-burger',        'description'=>'Crispy fish fillet with tartar sauce and lettuce.',         'image'=>'https://source.unsplash.com/400x300/?fishburger',     'price'=>649,  'rating'=>3,'priority'=>10,'status'=>1,'menu_category_id'=>$cats['burgers']],
+
+            // ── PIZZAS (10) ────────────────────────────────────────────────
+            ['title'=>'Margherita Pizza',          'slug'=>'margherita-pizza',          'description'=>'Classic tomato base, mozzarella and fresh basil.',          'image'=>'https://source.unsplash.com/400x300/?margherita',     'price'=>699,  'rating'=>5,'priority'=>1, 'status'=>1,'menu_category_id'=>$cats['pizzas']],
+            ['title'=>'Pepperoni Pizza',           'slug'=>'pepperoni-pizza',           'description'=>'Generous pepperoni slices on rich tomato sauce.',           'image'=>'https://source.unsplash.com/400x300/?pepperonipizza', 'price'=>799,  'rating'=>5,'priority'=>2, 'status'=>1,'menu_category_id'=>$cats['pizzas']],
+            ['title'=>'BBQ Chicken Pizza',         'slug'=>'bbq-chicken-pizza',         'description'=>'Grilled chicken, BBQ sauce, red onion, mozzarella.',        'image'=>'https://source.unsplash.com/400x300/?bbqpizza',       'price'=>849,  'rating'=>4,'priority'=>3, 'status'=>1,'menu_category_id'=>$cats['pizzas']],
+            ['title'=>'Veg Supreme Pizza',         'slug'=>'veg-supreme-pizza',         'description'=>'Bell peppers, olives, mushrooms, onions & corn.',           'image'=>'https://source.unsplash.com/400x300/?vegpizza',       'price'=>749,  'rating'=>4,'priority'=>4, 'status'=>1,'menu_category_id'=>$cats['pizzas']],
+            ['title'=>'Four Cheese Pizza',         'slug'=>'four-cheese-pizza',         'description'=>'Mozzarella, cheddar, parmesan and gorgonzola.',             'image'=>'https://source.unsplash.com/400x300/?cheesepizza',    'price'=>899,  'rating'=>5,'priority'=>5, 'status'=>1,'menu_category_id'=>$cats['pizzas']],
+            ['title'=>'Hawaiian Pizza',            'slug'=>'hawaiian-pizza',            'description'=>'Ham and pineapple on classic tomato base.',                 'image'=>'https://source.unsplash.com/400x300/?hawaiianpizza',  'price'=>799,  'rating'=>3,'priority'=>6, 'status'=>1,'menu_category_id'=>$cats['pizzas']],
+            ['title'=>'Meat Feast Pizza',          'slug'=>'meat-feast-pizza',          'description'=>'Pepperoni, sausage, ham, beef & mozzarella.',               'image'=>'https://source.unsplash.com/400x300/?meatpizza',      'price'=>949,  'rating'=>5,'priority'=>7, 'status'=>1,'menu_category_id'=>$cats['pizzas']],
+            ['title'=>'Spicy Diavola Pizza',       'slug'=>'spicy-diavola-pizza',       'description'=>'Spicy salami, chilli flakes, tomato and mozzarella.',       'image'=>'https://source.unsplash.com/400x300/?diavolapizza',   'price'=>849,  'rating'=>4,'priority'=>8, 'status'=>1,'menu_category_id'=>$cats['pizzas']],
+            ['title'=>'Pesto Chicken Pizza',       'slug'=>'pesto-chicken-pizza',       'description'=>'Basil pesto base, grilled chicken, sun-dried tomatoes.',    'image'=>'https://source.unsplash.com/400x300/?pestopizza',     'price'=>849,  'rating'=>4,'priority'=>9, 'status'=>1,'menu_category_id'=>$cats['pizzas']],
+            ['title'=>'Truffle Mushroom Pizza',    'slug'=>'truffle-mushroom-pizza',    'description'=>'Truffle oil, wild mushrooms, parmesan, rocket.',            'image'=>'https://source.unsplash.com/400x300/?trufflepizza',   'price'=>999,  'rating'=>5,'priority'=>10,'status'=>1,'menu_category_id'=>$cats['pizzas']],
+
+            // ── PASTA (10) ─────────────────────────────────────────────────
+            ['title'=>'Spaghetti Bolognese',       'slug'=>'spaghetti-bolognese',       'description'=>'Slow-cooked beef ragù with spaghetti.',                    'image'=>'https://source.unsplash.com/400x300/?bolognese',      'price'=>699,  'rating'=>5,'priority'=>1, 'status'=>1,'menu_category_id'=>$cats['pasta']],
+            ['title'=>'Spaghetti Carbonara',       'slug'=>'spaghetti-carbonara',       'description'=>'Egg yolk, pancetta, parmesan & black pepper.',             'image'=>'https://source.unsplash.com/400x300/?carbonara',      'price'=>749,  'rating'=>5,'priority'=>2, 'status'=>1,'menu_category_id'=>$cats['pasta']],
+            ['title'=>'Penne Arrabbiata',          'slug'=>'penne-arrabbiata',          'description'=>'Spicy tomato sauce with garlic and chilli.',               'image'=>'https://source.unsplash.com/400x300/?arrabbiata',     'price'=>599,  'rating'=>4,'priority'=>3, 'status'=>1,'menu_category_id'=>$cats['pasta']],
+            ['title'=>'Fettuccine Alfredo',        'slug'=>'fettuccine-alfredo',        'description'=>'Creamy butter-parmesan sauce with fettuccine.',            'image'=>'https://source.unsplash.com/400x300/?alfredo',        'price'=>699,  'rating'=>4,'priority'=>4, 'status'=>1,'menu_category_id'=>$cats['pasta']],
+            ['title'=>'Lasagna',                   'slug'=>'lasagna',                   'description'=>'Layered beef ragù, béchamel and pasta sheets.',            'image'=>'https://source.unsplash.com/400x300/?lasagna',        'price'=>799,  'rating'=>5,'priority'=>5, 'status'=>1,'menu_category_id'=>$cats['pasta']],
+            ['title'=>'Pesto Pasta',               'slug'=>'pesto-pasta',               'description'=>'Basil pesto, pine nuts, parmesan and penne.',              'image'=>'https://source.unsplash.com/400x300/?pestopasta',     'price'=>649,  'rating'=>4,'priority'=>6, 'status'=>1,'menu_category_id'=>$cats['pasta']],
+            ['title'=>'Seafood Linguine',          'slug'=>'seafood-linguine',          'description'=>'Prawns, squid, mussels in white wine tomato sauce.',       'image'=>'https://source.unsplash.com/400x300/?seafoodpasta',   'price'=>899,  'rating'=>5,'priority'=>7, 'status'=>1,'menu_category_id'=>$cats['pasta']],
+            ['title'=>'Mushroom Risotto',          'slug'=>'mushroom-risotto',          'description'=>'Creamy arborio rice with wild mushrooms & truffle oil.',   'image'=>'https://source.unsplash.com/400x300/?risotto',        'price'=>749,  'rating'=>4,'priority'=>8, 'status'=>1,'menu_category_id'=>$cats['pasta']],
+            ['title'=>'Chicken Penne',             'slug'=>'chicken-penne',             'description'=>'Grilled chicken in creamy tomato penne.',                  'image'=>'https://source.unsplash.com/400x300/?chickenpasta',   'price'=>699,  'rating'=>4,'priority'=>9, 'status'=>1,'menu_category_id'=>$cats['pasta']],
+            ['title'=>'Gnocchi Sorrentina',        'slug'=>'gnocchi-sorrentina',        'description'=>'Potato gnocchi with tomato, basil and mozzarella.',        'image'=>'https://source.unsplash.com/400x300/?gnocchi',        'price'=>749,  'rating'=>4,'priority'=>10,'status'=>1,'menu_category_id'=>$cats['pasta']],
+
+            // ── SALADS (10) ────────────────────────────────────────────────
+            ['title'=>'Caesar Salad',              'slug'=>'caesar-salad',              'description'=>'Romaine, croutons, parmesan, classic Caesar dressing.',    'image'=>'https://source.unsplash.com/400x300/?caesarsalad',    'price'=>499,  'rating'=>4,'priority'=>1, 'status'=>1,'menu_category_id'=>$cats['salads']],
+            ['title'=>'Greek Salad',               'slug'=>'greek-salad',               'description'=>'Cucumber, tomato, olives, feta and oregano.',              'image'=>'https://source.unsplash.com/400x300/?greeksalad',     'price'=>449,  'rating'=>4,'priority'=>2, 'status'=>1,'menu_category_id'=>$cats['salads']],
+            ['title'=>'Garden Fresh Salad',        'slug'=>'garden-fresh-salad',        'description'=>'Mixed greens, cherry tomatoes, cucumber, vinaigrette.',    'image'=>'https://source.unsplash.com/400x300/?salad',          'price'=>399,  'rating'=>3,'priority'=>3, 'status'=>1,'menu_category_id'=>$cats['salads']],
+            ['title'=>'Chicken Avocado Salad',     'slug'=>'chicken-avocado-salad',     'description'=>'Grilled chicken, avocado, corn, lime dressing.',           'image'=>'https://source.unsplash.com/400x300/?avocadosalad',   'price'=>599,  'rating'=>5,'priority'=>4, 'status'=>1,'menu_category_id'=>$cats['salads']],
+            ['title'=>'Nicoise Salad',             'slug'=>'nicoise-salad',             'description'=>'Tuna, egg, green beans, olives, Dijon dressing.',          'image'=>'https://source.unsplash.com/400x300/?nicoicesalad',   'price'=>549,  'rating'=>4,'priority'=>5, 'status'=>1,'menu_category_id'=>$cats['salads']],
+            ['title'=>'Caprese Salad',             'slug'=>'caprese-salad',             'description'=>'Fresh mozzarella, tomato, basil and olive oil.',           'image'=>'https://source.unsplash.com/400x300/?capresesalad',   'price'=>499,  'rating'=>5,'priority'=>6, 'status'=>1,'menu_category_id'=>$cats['salads']],
+            ['title'=>'Quinoa Salad',              'slug'=>'quinoa-salad',              'description'=>'Quinoa, chickpeas, roasted veggies, lemon tahini.',        'image'=>'https://source.unsplash.com/400x300/?quinoasalad',    'price'=>549,  'rating'=>4,'priority'=>7, 'status'=>1,'menu_category_id'=>$cats['salads']],
+            ['title'=>'Coleslaw',                  'slug'=>'coleslaw',                  'description'=>'Creamy shredded cabbage and carrot salad.',                'image'=>'https://source.unsplash.com/400x300/?coleslaw',       'price'=>249,  'rating'=>3,'priority'=>8, 'status'=>1,'menu_category_id'=>$cats['salads']],
+            ['title'=>'Waldorf Salad',             'slug'=>'waldorf-salad',             'description'=>'Apple, celery, walnuts, grapes and mayo dressing.',        'image'=>'https://source.unsplash.com/400x300/?waldorfsalad',   'price'=>449,  'rating'=>3,'priority'=>9, 'status'=>1,'menu_category_id'=>$cats['salads']],
+            ['title'=>'Prawn Salad',               'slug'=>'prawn-salad',               'description'=>'Chilled prawns, avocado, mango, citrus dressing.',         'image'=>'https://source.unsplash.com/400x300/?prawnsalad',     'price'=>649,  'rating'=>5,'priority'=>10,'status'=>1,'menu_category_id'=>$cats['salads']],
+
+            // ── SANDWICHES (10) ────────────────────────────────────────────
+            ['title'=>'Club Sandwich',             'slug'=>'club-sandwich',             'description'=>'Triple-decker with chicken, bacon, egg & lettuce.',        'image'=>'https://source.unsplash.com/400x300/?clubsandwich',   'price'=>549,  'rating'=>4,'priority'=>1, 'status'=>1,'menu_category_id'=>$cats['sandwiches']],
+            ['title'=>'BLT Sandwich',              'slug'=>'blt-sandwich',              'description'=>'Bacon, lettuce, tomato on toasted sourdough.',             'image'=>'https://source.unsplash.com/400x300/?blt',            'price'=>449,  'rating'=>4,'priority'=>2, 'status'=>1,'menu_category_id'=>$cats['sandwiches']],
+            ['title'=>'Grilled Cheese',            'slug'=>'grilled-cheese',            'description'=>'Buttery toasted bread with melted cheddar.',               'image'=>'https://source.unsplash.com/400x300/?grilledcheese',  'price'=>349,  'rating'=>4,'priority'=>3, 'status'=>1,'menu_category_id'=>$cats['sandwiches']],
+            ['title'=>'Tuna Melt',                 'slug'=>'tuna-melt',                 'description'=>'Tuna mayo with melted cheese on toasted bread.',           'image'=>'https://source.unsplash.com/400x300/?tunamelt',       'price'=>499,  'rating'=>4,'priority'=>4, 'status'=>1,'menu_category_id'=>$cats['sandwiches']],
+            ['title'=>'Chicken Caesar Wrap',       'slug'=>'chicken-caesar-wrap',       'description'=>'Grilled chicken, romaine, parmesan in a flour tortilla.',  'image'=>'https://source.unsplash.com/400x300/?wrap',           'price'=>549,  'rating'=>5,'priority'=>5, 'status'=>1,'menu_category_id'=>$cats['sandwiches']],
+            ['title'=>'Falafel Wrap',              'slug'=>'falafel-wrap',              'description'=>'Crispy falafel, hummus, salad in a flatbread.',            'image'=>'https://source.unsplash.com/400x300/?falafelwrap',    'price'=>499,  'rating'=>4,'priority'=>6, 'status'=>1,'menu_category_id'=>$cats['sandwiches']],
+            ['title'=>'Beef Sub',                  'slug'=>'beef-sub',                  'description'=>'Sliced beef, caramelised onions, mustard on hoagie roll.', 'image'=>'https://source.unsplash.com/400x300/?beefsubsandwich','price'=>599,  'rating'=>4,'priority'=>7, 'status'=>1,'menu_category_id'=>$cats['sandwiches']],
+            ['title'=>'Veggie Panini',             'slug'=>'veggie-panini',             'description'=>'Grilled vegetables and pesto in pressed panini.',          'image'=>'https://source.unsplash.com/400x300/?panini',         'price'=>449,  'rating'=>3,'priority'=>8, 'status'=>1,'menu_category_id'=>$cats['sandwiches']],
+            ['title'=>'Egg & Cress Sandwich',      'slug'=>'egg-cress-sandwich',        'description'=>'Egg mayo and mustard cress on soft white bread.',          'image'=>'https://source.unsplash.com/400x300/?eggsandwich',    'price'=>349,  'rating'=>3,'priority'=>9, 'status'=>1,'menu_category_id'=>$cats['sandwiches']],
+            ['title'=>'Pulled Pork Sandwich',      'slug'=>'pulled-pork-sandwich',      'description'=>'Slow-cooked BBQ pulled pork with apple slaw.',             'image'=>'https://source.unsplash.com/400x300/?pulledpork',     'price'=>649,  'rating'=>5,'priority'=>10,'status'=>1,'menu_category_id'=>$cats['sandwiches']],
+
+            // ── SOUPS (10) ─────────────────────────────────────────────────
+            ['title'=>'Tomato Basil Soup',         'slug'=>'tomato-basil-soup',         'description'=>'Velvety roasted tomato soup with fresh basil.',            'image'=>'https://source.unsplash.com/400x300/?tomatosoup',     'price'=>299,  'rating'=>4,'priority'=>1, 'status'=>1,'menu_category_id'=>$cats['soups']],
+            ['title'=>'Cream of Mushroom Soup',    'slug'=>'cream-mushroom-soup',       'description'=>'Rich and creamy wild mushroom soup.',                      'image'=>'https://source.unsplash.com/400x300/?mushroomsoup',   'price'=>349,  'rating'=>5,'priority'=>2, 'status'=>1,'menu_category_id'=>$cats['soups']],
+            ['title'=>'French Onion Soup',         'slug'=>'french-onion-soup',         'description'=>'Caramelised onion broth topped with gruyère crouton.',     'image'=>'https://source.unsplash.com/400x300/?onionsoup',      'price'=>399,  'rating'=>5,'priority'=>3, 'status'=>1,'menu_category_id'=>$cats['soups']],
+            ['title'=>'Chicken Noodle Soup',       'slug'=>'chicken-noodle-soup',       'description'=>'Classic chicken broth with noodles and vegetables.',       'image'=>'https://source.unsplash.com/400x300/?chickensoup',    'price'=>349,  'rating'=>4,'priority'=>4, 'status'=>1,'menu_category_id'=>$cats['soups']],
+            ['title'=>'Lentil Soup',               'slug'=>'lentil-soup',               'description'=>'Spiced red lentil soup with lemon and cumin.',             'image'=>'https://source.unsplash.com/400x300/?lentilsoup',     'price'=>299,  'rating'=>4,'priority'=>5, 'status'=>1,'menu_category_id'=>$cats['soups']],
+            ['title'=>'Pumpkin Soup',              'slug'=>'pumpkin-soup',              'description'=>'Roasted pumpkin soup with a swirl of cream.',              'image'=>'https://source.unsplash.com/400x300/?pumpkinsoup',    'price'=>349,  'rating'=>4,'priority'=>6, 'status'=>1,'menu_category_id'=>$cats['soups']],
+            ['title'=>'Minestrone',                'slug'=>'minestrone',                'description'=>'Hearty Italian vegetable and bean soup.',                  'image'=>'https://source.unsplash.com/400x300/?minestrone',     'price'=>349,  'rating'=>4,'priority'=>7, 'status'=>1,'menu_category_id'=>$cats['soups']],
+            ['title'=>'Broccoli Cheddar Soup',     'slug'=>'broccoli-cheddar-soup',     'description'=>'Creamy broccoli soup topped with cheddar.',                'image'=>'https://source.unsplash.com/400x300/?broccolisoup',   'price'=>349,  'rating'=>4,'priority'=>8, 'status'=>1,'menu_category_id'=>$cats['soups']],
+            ['title'=>'Seafood Chowder',           'slug'=>'seafood-chowder',           'description'=>'Creamy chowder with fish, prawns and clams.',              'image'=>'https://source.unsplash.com/400x300/?chowder',        'price'=>449,  'rating'=>5,'priority'=>9, 'status'=>1,'menu_category_id'=>$cats['soups']],
+            ['title'=>'Gazpacho',                  'slug'=>'gazpacho',                  'description'=>'Chilled Spanish tomato soup with cucumber and peppers.',   'image'=>'https://source.unsplash.com/400x300/?gazpacho',       'price'=>299,  'rating'=>3,'priority'=>10,'status'=>1,'menu_category_id'=>$cats['soups']],
+
+            // ── GRILLS (10) ────────────────────────────────────────────────
+            ['title'=>'Ribeye Steak',              'slug'=>'ribeye-steak',              'description'=>'300g aged ribeye with garlic butter and fries.',           'image'=>'https://source.unsplash.com/400x300/?steak',          'price'=>1499, 'rating'=>5,'priority'=>1, 'status'=>1,'menu_category_id'=>$cats['grills']],
+            ['title'=>'Grilled Chicken',           'slug'=>'grilled-chicken',           'description'=>'Herb-marinated chicken breast with grilled veggies.',      'image'=>'https://source.unsplash.com/400x300/?grilledchicken', 'price'=>799,  'rating'=>4,'priority'=>2, 'status'=>1,'menu_category_id'=>$cats['grills']],
+            ['title'=>'BBQ Pork Ribs',             'slug'=>'bbq-pork-ribs',             'description'=>'Slow-smoked ribs glazed in BBQ sauce.',                   'image'=>'https://source.unsplash.com/400x300/?porkribbs',      'price'=>1199, 'rating'=>5,'priority'=>3, 'status'=>1,'menu_category_id'=>$cats['grills']],
+            ['title'=>'Lamb Chops',                'slug'=>'lamb-chops',                'description'=>'Rosemary-marinated lamb chops, mint jelly on the side.',   'image'=>'https://source.unsplash.com/400x300/?lambchops',      'price'=>1299, 'rating'=>5,'priority'=>4, 'status'=>1,'menu_category_id'=>$cats['grills']],
+            ['title'=>'Grilled Salmon',            'slug'=>'grilled-salmon',            'description'=>'Atlantic salmon with lemon butter and asparagus.',         'image'=>'https://source.unsplash.com/400x300/?grilledsalmon',  'price'=>999,  'rating'=>5,'priority'=>5, 'status'=>1,'menu_category_id'=>$cats['grills']],
+            ['title'=>'Chicken Skewers',           'slug'=>'chicken-skewers',           'description'=>'Marinated chicken kebab with tzatziki and pita.',          'image'=>'https://source.unsplash.com/400x300/?kebab',          'price'=>699,  'rating'=>4,'priority'=>6, 'status'=>1,'menu_category_id'=>$cats['grills']],
+            ['title'=>'Mixed Grill Platter',       'slug'=>'mixed-grill-platter',       'description'=>'Ribs, chicken, sausage, lamb chop — the works.',           'image'=>'https://source.unsplash.com/400x300/?mixedgrill',     'price'=>1799, 'rating'=>5,'priority'=>7, 'status'=>1,'menu_category_id'=>$cats['grills']],
+            ['title'=>'Grilled Prawns',            'slug'=>'grilled-prawns',            'description'=>'Jumbo prawns grilled in garlic and herb butter.',          'image'=>'https://source.unsplash.com/400x300/?grilledprawns',  'price'=>999,  'rating'=>4,'priority'=>8, 'status'=>1,'menu_category_id'=>$cats['grills']],
+            ['title'=>'T-Bone Steak',              'slug'=>'t-bone-steak',              'description'=>'Impressive T-bone cooked to your preference.',             'image'=>'https://source.unsplash.com/400x300/?tbone',          'price'=>1699, 'rating'=>5,'priority'=>9, 'status'=>1,'menu_category_id'=>$cats['grills']],
+            ['title'=>'Corn on the Cob',           'slug'=>'corn-on-the-cob',           'description'=>'Charred corn with chilli butter and lime.',                'image'=>'https://source.unsplash.com/400x300/?corn',           'price'=>249,  'rating'=>3,'priority'=>10,'status'=>1,'menu_category_id'=>$cats['grills']],
+
+            // ── DESSERTS (10) ──────────────────────────────────────────────
+            ['title'=>'Chocolate Lava Cake',       'slug'=>'chocolate-lava-cake',       'description'=>'Warm chocolate cake with a molten centre.',                'image'=>'https://source.unsplash.com/400x300/?lavacake',       'price'=>499,  'rating'=>5,'priority'=>1, 'status'=>1,'menu_category_id'=>$cats['desserts']],
+            ['title'=>'New York Cheesecake',       'slug'=>'new-york-cheesecake',       'description'=>'Classic baked cheesecake with berry compote.',             'image'=>'https://source.unsplash.com/400x300/?cheesecake',     'price'=>449,  'rating'=>5,'priority'=>2, 'status'=>1,'menu_category_id'=>$cats['desserts']],
+            ['title'=>'Tiramisu',                  'slug'=>'tiramisu',                  'description'=>'Coffee-soaked ladyfingers with mascarpone cream.',         'image'=>'https://source.unsplash.com/400x300/?tiramisu',       'price'=>449,  'rating'=>5,'priority'=>3, 'status'=>1,'menu_category_id'=>$cats['desserts']],
+            ['title'=>'Crème Brûlée',              'slug'=>'creme-brulee',              'description'=>'Silky vanilla custard with caramelised sugar top.',        'image'=>'https://source.unsplash.com/400x300/?cremebrulee',    'price'=>399,  'rating'=>5,'priority'=>4, 'status'=>1,'menu_category_id'=>$cats['desserts']],
+            ['title'=>'Brownie & Ice Cream',       'slug'=>'brownie-ice-cream',         'description'=>'Fudgy brownie served warm with vanilla ice cream.',        'image'=>'https://source.unsplash.com/400x300/?brownie',        'price'=>399,  'rating'=>4,'priority'=>5, 'status'=>1,'menu_category_id'=>$cats['desserts']],
+            ['title'=>'Waffles',                   'slug'=>'waffles',                   'description'=>'Belgian waffles with whipped cream and maple syrup.',      'image'=>'https://source.unsplash.com/400x300/?waffles',        'price'=>449,  'rating'=>4,'priority'=>6, 'status'=>1,'menu_category_id'=>$cats['desserts']],
+            ['title'=>'Panna Cotta',               'slug'=>'panna-cotta',               'description'=>'Vanilla panna cotta with raspberry coulis.',               'image'=>'https://source.unsplash.com/400x300/?pannacotta',     'price'=>349,  'rating'=>4,'priority'=>7, 'status'=>1,'menu_category_id'=>$cats['desserts']],
+            ['title'=>'Apple Crumble',             'slug'=>'apple-crumble',             'description'=>'Spiced apple baked under an oat crumble topping.',         'image'=>'https://source.unsplash.com/400x300/?applecrumble',   'price'=>399,  'rating'=>4,'priority'=>8, 'status'=>1,'menu_category_id'=>$cats['desserts']],
+            ['title'=>'Ice Cream Sundae',          'slug'=>'ice-cream-sundae',          'description'=>'Three scoops, chocolate sauce, nuts and cherry.',          'image'=>'https://source.unsplash.com/400x300/?icecream',       'price'=>349,  'rating'=>4,'priority'=>9, 'status'=>1,'menu_category_id'=>$cats['desserts']],
+            ['title'=>'Sticky Toffee Pudding',     'slug'=>'sticky-toffee-pudding',     'description'=>'Moist date sponge drenched in toffee sauce.',             'image'=>'https://source.unsplash.com/400x300/?pudding',        'price'=>399,  'rating'=>5,'priority'=>10,'status'=>1,'menu_category_id'=>$cats['desserts']],
+
+            // ── HOT DRINKS (10) ────────────────────────────────────────────
+            ['title'=>'Espresso',                  'slug'=>'espresso',                  'description'=>'Single shot of rich, concentrated espresso.',              'image'=>'https://source.unsplash.com/400x300/?espresso',       'price'=>199,  'rating'=>4,'priority'=>1, 'status'=>1,'menu_category_id'=>$cats['hot-drinks']],
+            ['title'=>'Cappuccino',                'slug'=>'cappuccino',                'description'=>'Espresso with steamed milk and thick foam.',               'image'=>'https://source.unsplash.com/400x300/?cappuccino',     'price'=>299,  'rating'=>5,'priority'=>2, 'status'=>1,'menu_category_id'=>$cats['hot-drinks']],
+            ['title'=>'Latte',                     'slug'=>'latte',                     'description'=>'Smooth espresso with steamed milk, light foam.',           'image'=>'https://source.unsplash.com/400x300/?latte',          'price'=>299,  'rating'=>5,'priority'=>3, 'status'=>1,'menu_category_id'=>$cats['hot-drinks']],
+            ['title'=>'Flat White',                'slug'=>'flat-white',                'description'=>'Double ristretto with velvety microfoam milk.',            'image'=>'https://source.unsplash.com/400x300/?flatwhite',      'price'=>299,  'rating'=>5,'priority'=>4, 'status'=>1,'menu_category_id'=>$cats['hot-drinks']],
+            ['title'=>'Hot Chocolate',             'slug'=>'hot-chocolate',             'description'=>'Creamy Belgian hot chocolate topped with cream.',          'image'=>'https://source.unsplash.com/400x300/?hotchocolate',   'price'=>299,  'rating'=>5,'priority'=>5, 'status'=>1,'menu_category_id'=>$cats['hot-drinks']],
+            ['title'=>'English Breakfast Tea',     'slug'=>'english-breakfast-tea',     'description'=>'Classic black tea served with milk.',                      'image'=>'https://source.unsplash.com/400x300/?tea',            'price'=>199,  'rating'=>4,'priority'=>6, 'status'=>1,'menu_category_id'=>$cats['hot-drinks']],
+            ['title'=>'Green Tea',                 'slug'=>'green-tea',                 'description'=>'Premium Japanese green tea, light and refreshing.',        'image'=>'https://source.unsplash.com/400x300/?greentea',       'price'=>199,  'rating'=>4,'priority'=>7, 'status'=>1,'menu_category_id'=>$cats['hot-drinks']],
+            ['title'=>'Chai Latte',                'slug'=>'chai-latte',                'description'=>'Spiced chai concentrate with steamed oat milk.',           'image'=>'https://source.unsplash.com/400x300/?chai',           'price'=>299,  'rating'=>4,'priority'=>8, 'status'=>1,'menu_category_id'=>$cats['hot-drinks']],
+            ['title'=>'Mocha',                     'slug'=>'mocha',                     'description'=>'Espresso, chocolate sauce and steamed milk.',              'image'=>'https://source.unsplash.com/400x300/?mocha',          'price'=>329,  'rating'=>5,'priority'=>9, 'status'=>1,'menu_category_id'=>$cats['hot-drinks']],
+            ['title'=>'Americano',                 'slug'=>'americano',                 'description'=>'Double espresso topped with hot water.',                   'image'=>'https://source.unsplash.com/400x300/?americano',      'price'=>249,  'rating'=>4,'priority'=>10,'status'=>1,'menu_category_id'=>$cats['hot-drinks']],
+
+            // ── COLD DRINKS (10) ───────────────────────────────────────────
+            ['title'=>'Fresh Orange Juice',        'slug'=>'fresh-orange-juice',        'description'=>'Freshly squeezed orange juice, served chilled.',           'image'=>'https://source.unsplash.com/400x300/?orangejuice',    'price'=>279,  'rating'=>4,'priority'=>1, 'status'=>1,'menu_category_id'=>$cats['cold-drinks']],
+            ['title'=>'Mango Lassi',               'slug'=>'mango-lassi',               'description'=>'Chilled mango and yoghurt drink with a hint of cardamom.', 'image'=>'https://source.unsplash.com/400x300/?mangolassi',     'price'=>299,  'rating'=>5,'priority'=>2, 'status'=>1,'menu_category_id'=>$cats['cold-drinks']],
+            ['title'=>'Strawberry Milkshake',      'slug'=>'strawberry-milkshake',      'description'=>'Thick strawberry milkshake with whipped cream.',           'image'=>'https://source.unsplash.com/400x300/?milkshake',      'price'=>349,  'rating'=>5,'priority'=>3, 'status'=>1,'menu_category_id'=>$cats['cold-drinks']],
+            ['title'=>'Iced Latte',                'slug'=>'iced-latte',                'description'=>'Cold brew espresso over ice with chilled milk.',           'image'=>'https://source.unsplash.com/400x300/?icedlatte',      'price'=>329,  'rating'=>5,'priority'=>4, 'status'=>1,'menu_category_id'=>$cats['cold-drinks']],
+            ['title'=>'Watermelon Juice',          'slug'=>'watermelon-juice',          'description'=>'Fresh watermelon blended and served over ice.',            'image'=>'https://source.unsplash.com/400x300/?watermelonjuice','price'=>249,  'rating'=>4,'priority'=>5, 'status'=>1,'menu_category_id'=>$cats['cold-drinks']],
+            ['title'=>'Lemonade',                  'slug'=>'lemonade',                  'description'=>'Classic homemade lemonade, sweet and tangy.',              'image'=>'https://source.unsplash.com/400x300/?lemonade',       'price'=>229,  'rating'=>4,'priority'=>6, 'status'=>1,'menu_category_id'=>$cats['cold-drinks']],
+            ['title'=>'Iced Tea',                  'slug'=>'iced-tea',                  'description'=>'Cold-brewed black tea with lemon and mint.',               'image'=>'https://source.unsplash.com/400x300/?icedtea',        'price'=>229,  'rating'=>4,'priority'=>7, 'status'=>1,'menu_category_id'=>$cats['cold-drinks']],
+            ['title'=>'Coconut Water',             'slug'=>'coconut-water',             'description'=>'Pure natural coconut water, hydrating and light.',         'image'=>'https://source.unsplash.com/400x300/?coconutwater',   'price'=>249,  'rating'=>4,'priority'=>8, 'status'=>1,'menu_category_id'=>$cats['cold-drinks']],
+            ['title'=>'Berry Smoothie',            'slug'=>'berry-smoothie',            'description'=>'Mixed berry, banana and almond milk smoothie.',            'image'=>'https://source.unsplash.com/400x300/?smoothie',       'price'=>349,  'rating'=>5,'priority'=>9, 'status'=>1,'menu_category_id'=>$cats['cold-drinks']],
+            ['title'=>'Virgin Mojito',             'slug'=>'virgin-mojito',             'description'=>'Lime, mint, sugar syrup and soda water over ice.',         'image'=>'https://source.unsplash.com/400x300/?mojito',         'price'=>279,  'rating'=>5,'priority'=>10,'status'=>1,'menu_category_id'=>$cats['cold-drinks']],
         ];
 
         foreach ($menus as $menu) {
-            Menu::create($menu);
+            Menu::firstOrCreate(['slug' => $menu['slug']], $menu);
         }
     }
 }
