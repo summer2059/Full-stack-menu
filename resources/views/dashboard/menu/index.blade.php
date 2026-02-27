@@ -67,14 +67,29 @@ $(function () {
             { data: 'title',          name: 'title' },
             { data: 'category_title', name: 'category_title' },
             {
-                data: 'image', name: 'image',
+                data: 'image',
+                name: 'image',
                 render: function (data) {
-                    var def = "{{ asset('uploads/image.png') }}";
-                    return data
-                        ? '<img src="/uploads/images/' + data + '" style="max-width:100px;max-height:100px;">'
-                        : '<img src="' + def + '" style="max-width:100px;max-height:50px;">';
+                    var defaultImage = "{{ asset('uploads/image.png') }}";
+                    var imageSrc = defaultImage;
+
+                    if (data) {
+                        // Check if it's already a full URL
+                        if (data.startsWith('http://') || data.startsWith('https://')) {
+                            imageSrc = data;
+                        } else {
+                            imageSrc = "/uploads/images/" + data;
+                        }
+                    }
+
+                    return `
+                        <img src="${imageSrc}"
+                            onerror="this.onerror=null;this.src='${defaultImage}';"
+                            style="max-width:100px;max-height:100px;">
+                    `;
                 },
-                orderable: false, searchable: false
+                orderable: false,
+                searchable: false
             },
             {
                 data: 'status', name: 'status',

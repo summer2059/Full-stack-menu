@@ -1,10 +1,18 @@
 <section id="menu">
     @foreach($menuItems as $item)
         <div class="menu-card" data-category="{{ strtolower($item->menuCategory->title ?? 'uncategorized') }}">
+            @php
+                $image = $item->image;
+                if (filter_var($image, FILTER_VALIDATE_URL)) {
+                    $imageSrc = $image;
+                } else {
+                    $imageSrc = asset('uploads/images/' . $image);
+                }
+            @endphp
 
             {{-- Image --}}
             <div class="img-wrapper">
-                <img src="{{ asset('uploads/images/' . $item->image) }}"
+                <img src="{{ $imageSrc }}"
                      alt="{{ $item->title }}"
                      class="menu-image"
                      loading="lazy">
