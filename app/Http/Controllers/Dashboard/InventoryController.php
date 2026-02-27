@@ -25,13 +25,9 @@ class InventoryController extends Controller
         $totalItems      = InventoryItems::count();
         $lowStockCount   = $lowStock->count();
         $stockValue      = InventoryItems::selectRaw('SUM(current_stock * cost_per_unit) as total')->value('total') ?? 0;
-        $todayUsageCount = InventoryLog::where('type', 'consumption')
-            ->whereDate('created_at', today())
-            ->count();
+        $todayUsageCount = InventoryLog::where('type', 'consumption')->whereDate('created_at', today())->count();
 
-        return view('dashboard.inventory.index', compact(
-            'lowStock', 'totalItems', 'lowStockCount', 'stockValue', 'todayUsageCount'
-        ));
+        return view('dashboard.inventory.index', compact( 'lowStock', 'totalItems', 'lowStockCount', 'stockValue', 'todayUsageCount' ));
     }
 
     public function create()
@@ -113,11 +109,7 @@ class InventoryController extends Controller
         ]);
 
         try {
-            $this->inventoryService->restock(
-                $request->inventory_item_id,
-                $request->quantity,
-                $request->note
-            );
+            $this->inventoryService->restock( $request->inventory_item_id, $request->quantity, $request->note );
             toast('Stock restocked successfully!', 'success');
         } catch (Exception $e) {
             Log::error('Restock error: ' . $e->getMessage());

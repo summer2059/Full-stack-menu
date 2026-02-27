@@ -1,5 +1,4 @@
 <div>
-    {{-- Flash Messages --}}
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show mb-3">
             {{ session('success') }}
@@ -16,19 +15,12 @@
     <form wire:submit.prevent="save">
         <div class="row">
 
-            {{-- Item Name --}}
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-semibold">Item Name <span class="text-danger">*</span></label>
-                <input
-                    type="text"
-                    wire:model.live="name"
-                    class="form-control @error('name') is-invalid @enderror"
-                    placeholder="e.g. Tomatoes, Olive Oil"
-                >
+                <input type="text" wire:model.live="name" class="form-control @error('name') is-invalid @enderror" placeholder="e.g. Tomatoes, Olive Oil">
                 @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
-            {{-- Unit --}}
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-semibold">Unit <span class="text-danger">*</span></label>
                 <select wire:model.live="unit" class="form-select @error('unit') is-invalid @enderror">
@@ -40,23 +32,14 @@
                 @error('unit') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
-            {{-- Current / Opening Stock --}}
             <div class="col-md-4 mb-3">
                 <label class="form-label fw-semibold">
                     {{ $itemId ? 'Current Stock' : 'Opening Stock' }}
                     <span class="text-danger">*</span>
                 </label>
                 <div class="input-group">
-                    <input
-                        type="number"
-                        wire:model.live="current_stock"
-                        class="form-control @error('current_stock') is-invalid @enderror"
-                        step="0.01" min="0"
-                        placeholder="0.00"
-                    >
-                    <span class="input-group-text">
-                        {{ $unit ?: 'units' }}
-                    </span>
+                    <input type="number" wire:model.live="current_stock" class="form-control @error('current_stock') is-invalid @enderror" step="0.01" min="0" placeholder="0.00">
+                    <span class="input-group-text"> {{ $unit ?: 'units' }} </span>
                 </div>
                 @error('current_stock') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                 @if($itemId)
@@ -64,20 +47,13 @@
                 @endif
             </div>
 
-            {{-- Minimum Stock --}}
             <div class="col-md-4 mb-3">
                 <label class="form-label fw-semibold">
                     Minimum Stock
                     <span class="text-muted small">(reorder alert)</span>
                 </label>
                 <div class="input-group">
-                    <input
-                        type="number"
-                        wire:model.live="minimum_stock"
-                        class="form-control @error('minimum_stock') is-invalid @enderror"
-                        step="0.01" min="0"
-                        placeholder="0.00"
-                    >
+                    <input type="number" wire:model.live="minimum_stock" class="form-control @error('minimum_stock') is-invalid @enderror" step="0.01" min="0" placeholder="0.00" >
                     <span class="input-group-text">
                         {{ $unit ?: 'units' }}
                     </span>
@@ -85,23 +61,15 @@
                 @error('minimum_stock') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
             </div>
 
-            {{-- Cost Per Unit --}}
             <div class="col-md-4 mb-3">
-                <label class="form-label fw-semibold">Cost Per Unit ($)</label>
+                <label class="form-label fw-semibold">Cost Per Unit (Rs)</label>
                 <div class="input-group">
-                    <span class="input-group-text">$</span>
-                    <input
-                        type="number"
-                        wire:model.live="cost_per_unit"
-                        class="form-control @error('cost_per_unit') is-invalid @enderror"
-                        step="0.01" min="0"
-                        placeholder="0.00"
-                    >
+                    <span class="input-group-text">Rs</span>
+                    <input type="number" wire:model.live="cost_per_unit" class="form-control @error('cost_per_unit') is-invalid @enderror" step="0.01" min="0" placeholder="0.00" >
                 </div>
                 @error('cost_per_unit') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
             </div>
 
-            {{-- Status --}}
             <div class="col-md-4 mb-3">
                 <label class="form-label fw-semibold">Status</label>
                 <select wire:model="status" class="form-select @error('status') is-invalid @enderror">
@@ -111,7 +79,6 @@
                 @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
-            {{-- Stock Value Preview — reactive, updates as user types --}}
             <div class="col-12 mb-4">
                 <div class="alert alert-info d-flex align-items-center gap-2 mb-0">
                     <i class="fa fa-info-circle"></i>
@@ -124,14 +91,8 @@
 
         </div>
 
-        {{-- Buttons --}}
         <div class="text-end">
-            <button
-                type="submit"
-                class="btn btn-primary me-2"
-                wire:loading.attr="disabled"
-                wire:target="save"
-            >
+            <button type="submit" class="btn btn-primary me-2" wire:loading.attr="disabled" wire:target="save" >
                 <span wire:loading wire:target="save">
                     <span class="spinner-border spinner-border-sm me-1" role="status"></span>
                 </span>

@@ -18,7 +18,6 @@ class Form extends Component
     public string  $cost_per_unit = '0';
     public int     $status        = 1;
 
-    // Computed stock value preview (reactive)
     public float   $stockValuePreview = 0.0;
 
     protected InventoryService $inventoryService;
@@ -44,10 +43,6 @@ class Form extends Component
             $this->recalcPreview();
         }
     }
-
-    /**
-     * Validation rules.
-     */
     protected function rules(): array
     {
         return [
@@ -71,18 +66,11 @@ class Form extends Component
         ];
     }
 
-    /**
-     * Real-time validation.
-     */
     public function updated(string $field): void
     {
         $this->validateOnly($field);
         $this->recalcPreview();
     }
-
-    /**
-     * Recalculate stock value preview.
-     */
     public function recalcPreview(): void
     {
         $stock = (float) $this->current_stock;
@@ -90,9 +78,6 @@ class Form extends Component
         $this->stockValuePreview = $stock * $cost;
     }
 
-    /**
-     * Save — create or update.
-     */
     public function save(): void
     {
         $this->validate();
@@ -108,15 +93,12 @@ class Form extends Component
             ];
 
             if ($this->itemId) {
-                // Update
                 $item = InventoryItems::findOrFail($this->itemId);
                 $item->update($data);
                 session()->flash('success', 'Inventory item updated successfully!');
             } else {
-                // Create
                 $item = InventoryItems::create($data);
 
-                // Log opening stock
                 if ($item->current_stock > 0) {
                     InventoryLog::create([
                         'inventory_item_id' => $item->id,
@@ -143,7 +125,6 @@ class Form extends Component
 
     public function render()
     {
-        // maps to: resources/views/livewire/dashboard/inventory/form.blade.php
         return view('livewire.dashboard.inventory.form');
     }
 }

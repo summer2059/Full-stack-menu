@@ -28,10 +28,7 @@ class MenuController extends Controller
     public function store(MenuRequest $request)
     {
         try {
-            $this->menuService->create(
-                $request->validated(),
-                $request->hasFile('image') ? $request->file('image') : null
-            );
+            $this->menuService->create( $request->validated(), $request->hasFile('image') ? $request->file('image') : null );
 
             toast('Menu Added Successfully!', 'success');
             return redirect()->route('menu.index');
@@ -64,11 +61,7 @@ class MenuController extends Controller
     public function update(MenuRequest $request, string $id)
     {
         try {
-            $this->menuService->update(
-                (int) $id,
-                $request->validated(),
-                $request->hasFile('image') ? $request->file('image') : null
-            );
+            $this->menuService->update( (int) $id, $request->validated(), $request->hasFile('image') ? $request->file('image') : null );
 
             toast('Menu Updated Successfully!', 'success');
             return redirect()->route('menu.index');

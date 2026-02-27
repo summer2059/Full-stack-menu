@@ -29,10 +29,7 @@ class MenuCategoryController extends Controller
     public function store(MenuCategoryRequest $request)
     {
         try {
-            $this->menuCategoryService->create(
-                $request->validated(),
-                $request->hasFile('image') ? $request->file('image') : null
-            );
+            $this->menuCategoryService->create( $request->validated(), $request->hasFile('image') ? $request->file('image') : null );
 
             toast('Menu Category Added!', 'success');
             return redirect()->route('menu-category.index');
@@ -65,11 +62,7 @@ class MenuCategoryController extends Controller
     public function update(MenuCategoryRequest $request, string $id)
     {
         try {
-            $this->menuCategoryService->update(
-                (int) $id,
-                $request->validated(),
-                $request->hasFile('image') ? $request->file('image') : null
-            );
+            $this->menuCategoryService->update( (int) $id, $request->validated(), $request->hasFile('image') ? $request->file('image') : null );
 
             toast('Menu Category Updated!', 'success');
             return redirect()->route('menu-category.index');

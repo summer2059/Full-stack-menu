@@ -16,10 +16,9 @@ class Index extends Component
     public string $sortField     = 'name';
     public string $sortDir       = 'asc';
     public int    $perPage       = 10;
-    public string $statusFilter  = '';    // '' = All, '1' = Active, '0' = Inactive
-    public string $stockFilter   = '';    // '' = All, 'low' = Low stock, 'out' = Out of stock
+    public string $statusFilter  = '';    
+    public string $stockFilter   = '';    
 
-    // Restock modal
     public bool   $showRestock   = false;
     public ?int   $restockItemId = null;
     public string $restockName   = '';
@@ -27,7 +26,6 @@ class Index extends Component
     public string $restockQty    = '';
     public string $restockNote   = '';
 
-    // Delete modal
     public ?int   $deleteId      = null;
     public bool   $showConfirm   = false;
 
@@ -52,9 +50,6 @@ class Index extends Component
         $this->resetPage();
     }
 
-    /**
-     * Toggle status — pure Livewire.
-     */
     public function toggleStatus(int $id): void
     {
         try {
@@ -67,9 +62,6 @@ class Index extends Component
         }
     }
 
-    /**
-     * Open restock modal.
-     */
     public function openRestock(int $id, string $name, string $unit): void
     {
         $this->restockItemId = $id;
@@ -79,10 +71,6 @@ class Index extends Component
         $this->restockNote   = '';
         $this->showRestock   = true;
     }
-
-    /**
-     * Close restock modal.
-     */
     public function closeRestock(): void
     {
         $this->showRestock   = false;
@@ -91,9 +79,6 @@ class Index extends Component
         $this->restockNote   = '';
     }
 
-    /**
-     * Confirm restock — pure Livewire.
-     */
     public function confirmRestock(): void
     {
         $this->validate([
@@ -104,11 +89,7 @@ class Index extends Component
         ]);
 
         try {
-            $this->inventoryService->restock(
-                $this->restockItemId,
-                (float) $this->restockQty,
-                $this->restockNote ?: 'Manual restock'
-            );
+            $this->inventoryService->restock( $this->restockItemId, (float) $this->restockQty, $this->restockNote ?: 'Manual restock' );
             session()->flash('success', 'Stock restocked successfully!');
         } catch (\Exception $e) {
             Log::error('Restock error: ' . $e->getMessage());
@@ -118,9 +99,6 @@ class Index extends Component
         $this->closeRestock();
     }
 
-    /**
-     * Open delete confirmation modal.
-     */
     public function confirmDelete(int $id): void
     {
         $this->deleteId    = $id;
@@ -133,9 +111,6 @@ class Index extends Component
         $this->showConfirm = false;
     }
 
-    /**
-     * Execute delete.
-     */
     public function delete(): void
     {
         try {

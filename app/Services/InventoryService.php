@@ -11,14 +11,9 @@ use Illuminate\Support\Facades\Log;
 
 class InventoryService
 {
-    /**
-     * Deduct stock when order moves to "preparing".
-     * Skips if already deducted for this order.
-     */
     public function deductForOrder(Order $order): void
     {
         
-        // Prevent double deduction
         $alreadyDeducted = InventoryLog::where('order_id', $order->id)
             ->where('type', 'consumption')
             ->exists();
@@ -47,9 +42,6 @@ class InventoryService
         });
     }
 
-    /**
-     * Restore stock if order is cancelled after deduction.
-     */
     public function restoreForOrder(Order $order): void
     {
         $logs = InventoryLog::where('order_id', $order->id)
@@ -79,9 +71,6 @@ class InventoryService
         });
     }
 
-    /**
-     * Manual restock.
-     */
     public function restock(int $itemId, float $quantity, string $note = ''): InventoryItems
     {
         $item = InventoryItems::findOrFail($itemId);

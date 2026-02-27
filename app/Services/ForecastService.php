@@ -2,33 +2,25 @@
 
 namespace App\Services;
 
-
+use App\Models\Menu;
 use App\Models\Order;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class ForecastService
 {
-    /**
-     * Forecast tomorrow's sales based on past N days average for same day-of-week.
-     */
     public function forecastTomorrow(int $weeksBack = 4): array
     {
         $tomorrow = Carbon::tomorrow();
         $dayOfWeek = $tomorrow->dayOfWeek;
 
-        // Collect same day-of-week sales for past N weeks
         $historicalOrders = collect();
         for ($i = 1; $i <= $weeksBack; $i++) {
             $date = Carbon::tomorrow()->subWeeks($i);
-            $dailyOrders = Order::with('menu')
-                ->whereDate('created_at', $date)
-                ->where('status', 'payed')
-                ->get();
+            $dailyOrders = Order::with('menu')->whereDate('created_at', $date)->where('status', 'payed')->get();
             $historicalOrders->push($dailyOrders);
         }
 
-        // Average per menu item
         $menuTotals = [];
         foreach ($historicalOrders as $dayOrders) {
             foreach ($dayOrders as $order) {
@@ -49,7 +41,6 @@ class ForecastService
             ];
         }
 
-        // Sort by forecasted_qty descending
         usort($forecast, fn($a, $b) => $b['forecasted_qty'] - $a['forecasted_qty']);
 
         return [
@@ -59,22 +50,13 @@ class ForecastService
         ];
     }
 
-    /**
-     * Get today's actual vs yesterday's sales comparison.
-     */
     public function todayVsYesterday(): array
     {
-        $today = Order::where('status', 'payed')
-            ->whereDate('created_at', today())
-            ->sum('total_price');
+        $today = Order::where('status', 'payed')->whereDate('created_at', today())->sum('total_price');
 
-        $yesterday = Order::where('status', 'payed')
-            ->whereDate('created_at', Carbon::yesterday())
-            ->sum('total_price');
+        $yesterday = Order::where('status', 'payed')->whereDate('created_at', Carbon::yesterday())->sum('total_price');
 
-        $change = $yesterday > 0
-            ? round((($today - $yesterday) / $yesterday) * 100, 1)
-            : 0;
+        $change = $yesterday > 0 ? round((($today - $yesterday) / $yesterday) * 100, 1) : 0;
 
         return [
             'today'     => $today,
@@ -84,16 +66,13 @@ class ForecastService
         ];
     }
 
-    /**
-     * Get recommended inventory quantities for tomorrow based on forecast.
-     */
     public function inventoryNeededForTomorrow(): array
     {
         $forecast = $this->forecastTomorrow();
         $needed = [];
 
         foreach ($forecast['items'] as $item) {
-            $menu = \App\Models\Menu::with('inventoryItems')->find($item['menu_id']);
+            $menu = Menu::with('inventoryItems')->find($item['menu_id']);
             if (!$menu) continue;
 
             foreach ($menu->inventoryItems as $invItem) {
@@ -112,7 +91,6 @@ class ForecastService
             }
         }
 
-        // Calculate shortfall
         foreach ($needed as &$row) {
             $row['shortfall'] = max(0, $row['needed'] - $row['current_stock']);
             $row['sufficient'] = $row['shortfall'] == 0;
