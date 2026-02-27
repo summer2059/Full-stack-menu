@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Configuration;
 use App\Models\Financial;
 use App\Models\Media;
 use App\Models\Message;
@@ -65,7 +66,9 @@ class DashboardController extends Controller
     }
     public function qrCodes()
     {
-        $totalTables = 20; 
+        $totalTables = Configuration::where('configuration_key', 'number_of_qr_codes_per_table')->value('configuration_value');
+        $totalTables = $totalTables ? (int) $totalTables : 20;
+
         $tables = [];
         for ($i = 1; $i <= $totalTables; $i++) {
             $token = Crypt::encryptString((string) $i);
