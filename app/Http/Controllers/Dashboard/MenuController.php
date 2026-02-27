@@ -55,7 +55,7 @@ class MenuController extends Controller
     public function create()
     {
         $categories = MenuCategory::orderBy('title', 'asc')->get();
-        return view('dashboard.menu.create', compact('categories'));
+        return view('dashboard.menu.form', compact('categories'));
     }
 
     public function store(Request $request)
@@ -87,7 +87,7 @@ class MenuController extends Controller
         try {
             $data = $this->crudService->find($this->modelName, $id);
             $categories = MenuCategory::orderBy('title', 'asc')->get();
-            return view('dashboard.menu.edit', compact('data', 'categories'));
+            return view('dashboard.menu.form', compact('data', 'categories'));
         } catch (Exception $e) {
             Log::error('Menu Edit Error: '.$e->getMessage());
             toast('Menu not found!', 'error');

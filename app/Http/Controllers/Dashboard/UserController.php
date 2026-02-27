@@ -18,13 +18,13 @@ class UserController extends Controller
     public function __construct(CrudService $crudService)
     {
         $this->crudService = $crudService;
-        $this->modelName = 'user';
+        $this->modelName   = 'user';
     }
 
     public function index()
     {
         $title = 'Delete User!';
-        $text = "Are you sure you want to delete?";
+        $text  = 'Are you sure you want to delete?';
         confirmDelete($title, $text);
 
         if (request()->ajax()) {
@@ -33,16 +33,30 @@ class UserController extends Controller
 
                 return datatables()->of($data)
                     ->addIndexColumn()
-                    ->addColumn('role', function ($user) {
-                        return $user->getRoleNames()->implode(', ');
-                    })
-                    ->addColumn('action', function ($data) {
-                        return '
-                            <a href="' . route('user.edit', $data->id) . '" class="btn btn-sm btn-primary">Edit</a>
-                            <form action="' . route('user.destroy', $data->id) . '" method="POST" style="display:inline;">
-                                ' . csrf_field() . method_field('DELETE') . '
-                                <button type="submit" class="btn btn-sm btn-danger" data-confirm-delete="true">Delete</button>
-                            </form>';
+                    ->addColumn('role', fn($user) => $user->getRoleNames()->implode(', '))
+                    ->addColumn('action', function ($user) {
+                        $buttons = '';
+
+                        // EDIT — admin only
+                        if (auth()->user()->can('user.update')) {
+                            $buttons .= '<a href="' . route('user.edit', $user->id) . '"
+                                class="btn btn-sm btn-primary me-1">
+                                <i class="fa fa-pencil me-1"></i>Edit
+                            </a>';
+                        }
+
+                        // DELETE — admin only
+                        if (auth()->user()->can('user.delete')) {
+                            $buttons .= '
+                                <form action="' . route('user.destroy', $user->id) . '" method="POST" style="display:inline;">
+                                    ' . csrf_field() . method_field('DELETE') . '
+                                    <button type="submit" class="btn btn-sm btn-danger" data-confirm-delete="true">
+                                        <i class="fa fa-trash me-1"></i>Delete
+                                    </button>
+                                </form>';
+                        }
+
+                        return $buttons ?: '<span class="text-muted small">—</span>';
                     })
                     ->rawColumns(['action'])
                     ->make(true);
@@ -59,7 +73,7 @@ class UserController extends Controller
     {
         try {
             $roles = Role::all();
-            return view('dashboard.users.create', compact('roles'));
+            return view('dashboard.users.form', compact('roles'));
         } catch (Exception $e) {
             Log::error('User create error: ' . $e->getMessage());
             toast('Failed to load create user form.', 'error');
@@ -75,7 +89,7 @@ class UserController extends Controller
                 'email'       => 'required|string|email|max:255|unique:users',
                 'password'    => 'required|string|min:6|confirmed',
                 'role'        => 'required|exists:roles,name',
-                'permissions' => 'array'
+                'permissions' => 'array',
             ]);
 
             $user = User::create([
@@ -102,11 +116,11 @@ class UserController extends Controller
     public function edit(User $user)
     {
         try {
-            $roles = Role::all();
-            $userRole = $user->roles->pluck('name')->first();
+            $roles           = Role::all();
+            $userRole        = $user->roles->pluck('name')->first();
             $userPermissions = $user->permissions->pluck('name')->toArray();
 
-            return view('dashboard.users.edit', compact('user', 'roles', 'userRole', 'userPermissions'));
+            return view('dashboard.users.form', compact('user', 'roles', 'userRole', 'userPermissions'));
         } catch (Exception $e) {
             Log::error('User edit error: ' . $e->getMessage());
             toast('Failed to load edit form.', 'error');
@@ -122,10 +136,10 @@ class UserController extends Controller
                 'email'       => 'required|string|email|max:255|unique:users,email,' . $user->id,
                 'password'    => 'nullable|string|min:6|confirmed',
                 'role'        => 'required|exists:roles,name',
-                'permissions' => 'array'
+                'permissions' => 'array',
             ]);
 
-            $user->name = $validated['name'];
+            $user->name  = $validated['name'];
             $user->email = $validated['email'];
 
             if (!empty($validated['password'])) {
@@ -133,14 +147,8 @@ class UserController extends Controller
             }
 
             $user->save();
-
             $user->syncRoles([$validated['role']]);
-
-            if (!empty($validated['permissions'])) {
-                $user->syncPermissions($validated['permissions']);
-            } else {
-                $user->syncPermissions([]);
-            }
+            $user->syncPermissions($validated['permissions'] ?? []);
 
             toast('User updated successfully.', 'success');
             return redirect()->route('user.index');
@@ -160,30 +168,26 @@ class UserController extends Controller
             Log::error('User delete error: ' . $e->getMessage());
             toast('Failed to delete user.', 'error');
         }
-
         return redirect()->route('user.index');
     }
 
-
     public function getPermissionsByRole(Request $request)
-{
-    $role = \Spatie\Permission\Models\Role::where('name', $request->role)->first();
+    {
+        $role = \Spatie\Permission\Models\Role::where('name', $request->role)->first();
 
-    if (!$role) {
-        return response()->json([]);
+        if (!$role) {
+            return response()->json([]);
+        }
+
+        $permissions = $role->permissions->pluck('name');
+        $grouped     = [];
+
+        foreach ($permissions as $perm) {
+            [$module, $action] = explode('.', $perm, 2);
+            $module = ucfirst(str_replace('_', ' ', $module));
+            $grouped[$module][] = $perm;
+        }
+
+        return response()->json($grouped);
     }
-
-    $permissions = $role->permissions->pluck('name');
-    $grouped = [];
-
-    foreach ($permissions as $perm) {
-        // Split by module name (before the dot)
-        [$module, $action] = explode('.', $perm, 2);
-        $module = ucfirst(str_replace('_', ' ', $module));
-        $grouped[$module][] = $perm;
-    }
-
-    return response()->json($grouped);
-}
-
 }

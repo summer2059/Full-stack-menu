@@ -32,8 +32,8 @@ class ConfigurationController extends Controller
             'terms',
             'privacy',
             'keywords',
-            'description'
-
+            'description',
+            'number_of_qr_codes_per_table',
         );
 
         foreach ( $inputs as $inputKey => $inputValue ) {

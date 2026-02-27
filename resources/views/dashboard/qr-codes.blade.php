@@ -32,10 +32,24 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 no-print">
     <h2 class="mb-0">🍽️ Table QR Codes</h2>
+    <form action="{{ route('settings.update') }}" method="POST" id="qrSettingsForm" class="d-flex align-items-end gap-2">
+        @csrf
+        <div>
+            <label for="qrCount" class="form-label mb-1 fw-semibold"> QR Codes per Table </label>
+            <input type="number" id="qrCount" name="number_of_qr_codes_per_table" class="form-control @error('number_of_qr_codes_per_table') is-invalid @enderror" min="1" max="20" step="1" value="{{ old('number_of_qr_codes_per_table', getConfiguration('number_of_qr_codes_per_table')) }}" >
+            @error('number_of_qr_codes_per_table')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+        <button type="submit" class="btn btn-primary"> Save </button>
+    </form>
     <button class="btn btn-dark" onclick="window.print()">🖨️ Print All</button>
 </div>
 
 <div class="row g-4">
+    @if (!empty(getConfiguration('number_of_qr_codes_per_table')))
     @foreach($tables as $tableNumber => $url)
         <div class="col-6 col-sm-4 col-md-3 col-lg-2">
             <div class="qr-card">
@@ -47,6 +61,9 @@
             </div>
         </div>
     @endforeach
+    @else
+    <p>Please set the number of QR codes per table in the settings.</p>
+    @endif
 </div>
 @endsection
 
