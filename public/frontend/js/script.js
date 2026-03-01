@@ -1,8 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  const UUID_KEY    = 'bistro_customer_uuid';
-  const UUID_EXPIRY = 'bistro_uuid_expiry';
-  const TTL_MS      = 1 * 60 * 1000; // 1 minute (testing) increase 24 * 60 * 60 * 1000 for production
+  const UUID_KEY    = 'customer_uuid';
+  const UUID_EXPIRY = 'customer_uuid_expiry';
+  const TTL_MS      = 1  * 60 * 1000; // 1 minute (testing) increase 24 * 60 * 60 * 1000 for production
+  //todo : localStorage re;
 
   async function getOrCreateUUID() {
     const now    = Date.now();
@@ -18,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     localStorage.setItem(UUID_KEY, uuid);
     localStorage.setItem(UUID_EXPIRY, (now + TTL_MS).toString());
-    scheduleExpiry();
+    // scheduleExpiry();
     return uuid;
   }
   function scheduleExpiry(delay) {
