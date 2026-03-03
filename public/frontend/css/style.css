@@ -980,3 +980,120 @@ header.scrolled {
   .description { display: none; }
   .checkout-content { padding: 1.5rem; }
 }
+/* ── Cart Item Checkbox ─────────────────────
+   Append this to your existing style.css
+   ─────────────────────────────────────────── */
+
+/* Cart item layout update to accommodate checkbox */
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+  animation: item-slide-in 0.3s var(--ease-spring);
+}
+
+/* Custom checkbox wrapper */
+.cart-item-checkbox {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+
+/* Hide native checkbox */
+.cart-item-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+/* Custom checkmark box */
+.checkmark {
+  position: absolute;
+  inset: 0;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--cream);
+  transition: all 0.2s var(--ease-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Checked state */
+.cart-item-checkbox input:checked + .checkmark {
+  background: var(--amber);
+  border-color: var(--amber);
+  box-shadow: 0 2px 8px rgba(200, 129, 58, 0.3);
+}
+
+/* Checkmark tick */
+.checkmark::after {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 9px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) translateY(-1px);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.cart-item-checkbox input:checked + .checkmark::after {
+  opacity: 1;
+}
+
+/* Hover state */
+.cart-item-checkbox:hover .checkmark {
+  border-color: var(--amber);
+  background: var(--amber-glow);
+}
+
+/* Unchecked item — slightly muted */
+.cart-item--unselected .cart-item-name,
+.cart-item--unselected .cart-item-price {
+  opacity: 0.45;
+  text-decoration: line-through;
+  text-decoration-color: var(--muted);
+}
+
+/* ── Table verified badge ───────────────── */
+.table-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--green);
+  background: rgba(58, 125, 90, 0.1);
+  padding: 2px 8px;
+  border-radius: 100px;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.table-readonly-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(58, 125, 90, 0.07);
+  border: 1.5px solid rgba(58, 125, 90, 0.25);
+  border-radius: 12px;
+  color: var(--green);
+  font-weight: 600;
+  font-size: 0.95rem;
+}

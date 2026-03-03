@@ -10,15 +10,22 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
+        'customer_id',
         'menu_id',
         'quantity',
         'total_price',
         'table_number',
+        'note',
         'status',
     ];
 
     public function menu()
     {
         return $this->belongsTo(Menu::class);
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
     }
 }

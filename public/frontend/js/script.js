@@ -1,13 +1,37 @@
-/* ═══════════════════════════════════════════
-   🍽️  BISTRO — Restaurant Menu Script
-   ═══════════════════════════════════════════ */
-
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* ── State ──────────────────────────────── */
-  let cart = [];
+  const UUID_KEY    = 'bistro_customer_uuid';
+  const UUID_EXPIRY = 'bistro_uuid_expiry';
+  const TTL_MS      = 1 * 60 * 1000; // 1 minute (testing) increase 24 * 60 * 60 * 1000 for production
 
-  /* ── DOM Refs ───────────────────────────── */
+  async function getOrCreateUUID() {
+    const now    = Date.now();
+    const stored = localStorage.getItem(UUID_KEY);
+    const expiry = localStorage.getItem(UUID_EXPIRY);
+
+    if (stored && expiry && now < parseInt(expiry)) {
+      return stored;
+    }
+
+    const data = await apiFetch('/api/customer/uuid', 'POST');
+    const uuid = data.uuid;
+
+    localStorage.setItem(UUID_KEY, uuid);
+    localStorage.setItem(UUID_EXPIRY, (now + TTL_MS).toString());
+    scheduleExpiry();
+    return uuid;
+  }
+  function scheduleExpiry(delay) {
+  setTimeout(() => {
+    localStorage.removeItem(UUID_KEY);
+    localStorage.removeItem(UUID_EXPIRY);
+    customerUUID = null;
+    console.log("UUID expired and removed.");
+  }, delay);
+}
+
+  let cart = []; // [{ cart_id, menu_id, name, price, quantity, total_price, is_select }]
+
   const cartBox       = document.getElementById("cart");
   const cartItemsEl   = document.getElementById("cart-items");
   const cartTotalEl   = document.getElementById("cart-total");
@@ -16,15 +40,44 @@ document.addEventListener("DOMContentLoaded", () => {
   const checkoutItems = document.getElementById("checkout-items");
   const backdrop      = document.getElementById("cart-backdrop");
 
-  /* ── Header Scroll Effect ───────────────── */
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+  async function apiFetch(url, method = 'GET', body = null) {
+    const opts = {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json',
+      },
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    return res.json();
+  }
+
+  async function loadCartFromDB() {
+    try {
+      const data = await apiFetch(`/api/cart?uuid=${encodeURIComponent(customerUUID)}`);
+      cart = data.items || [];
+      renderCart();
+    } catch (e) {
+      console.error('Failed to load cart:', e);
+    }
+  }
+
   const header = document.querySelector("header");
   window.addEventListener("scroll", () => {
     header?.classList.toggle("scrolled", window.scrollY > 10);
   }, { passive: true });
 
-  /* ── Toast ──────────────────────────────── */
   function showToast(message) {
-    const container = document.querySelector(".toast-container") || createToastContainer();
+    const container = document.querySelector(".toast-container") || (() => {
+      const el = document.createElement("div");
+      el.className = "toast-container";
+      document.body.appendChild(el);
+      return el;
+    })();
     const toast = document.createElement("div");
     toast.className = "toast";
     toast.textContent = message;
@@ -32,14 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => toast.remove(), 2600);
   }
 
-  function createToastContainer() {
-    const el = document.createElement("div");
-    el.className = "toast-container";
-    document.body.appendChild(el);
-    return el;
-  }
-
-  /* ── Cart Visibility ────────────────────── */
   function openCart() {
     cartBox.classList.add("active");
     backdrop?.classList.add("active");
@@ -58,10 +103,8 @@ document.addEventListener("DOMContentLoaded", () => {
     cartBox.classList.contains("active") ? closeCartFn() : openCart();
   });
 
-  // Close cart on backdrop click
   backdrop?.addEventListener("click", closeCartFn);
 
-  // Close cart on outside click (desktop)
   document.addEventListener("click", (e) => {
     if (
       cartBox.classList.contains("active") &&
@@ -73,36 +116,50 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* ── Add to Cart ────────────────────────── */
-  window.addToCart = function (id, name, price) {
-    const existing = cart.find(i => i.id === id);
-    if (existing) {
-      existing.qty++;
-    } else {
-      cart.push({ id, name, price: parseFloat(price), qty: 1 });
+  window.addToCart = async function (id, name, price) {
+    if (!customerUUID) {
+      customerUUID = await getOrCreateUUID();
     }
 
-    // Button flash animation
+    const existing = cart.find(i => i.menu_id === id);
+    if (existing) {
+      existing.quantity++;
+      existing.total_price = existing.price * existing.quantity;
+    } else {
+      cart.push({ cart_id: null, menu_id: id, name, price: parseFloat(price), quantity: 1, total_price: parseFloat(price), is_select: 1 });
+    }
+    renderCart();
+
     const btn = document.querySelector(`[data-item-id="${id}"]`);
     if (btn) {
       btn.classList.add("added");
-      btn.textContent = "✓ Added";
+      btn.innerHTML = '✓ Added';
       setTimeout(() => {
         btn.classList.remove("added");
         btn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
       }, 1200);
     }
 
-    renderCart();
     openCart();
     showToast(`🛒 ${name} added to cart`);
+
+    try {
+      const data = await apiFetch('/api/cart/add', 'POST', {
+        uuid: customerUUID,
+        menu_id: id,
+      });
+      if (data.success) {
+        await loadCartFromDB();
+      }
+    } catch (e) {
+      console.error('Failed to sync cart:', e);
+    }
   };
 
-  /* ── Render Cart ────────────────────────── */
   function renderCart() {
     cartItemsEl.innerHTML = "";
 
-    if (cart.length === 0) {
+    if (!cart.length) {
       cartItemsEl.innerHTML = `
         <div class="cart-empty">
           <span class="empty-icon">🍽️</span>
@@ -113,30 +170,40 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    let total = 0;
+    let selectedTotal = 0;
     let totalQty = 0;
 
     cart.forEach((item, idx) => {
-      const itemTotal = item.price * item.qty;
-      total += itemTotal;
-      totalQty += item.qty;
+      const lineTotal = item.price * item.quantity;
+      totalQty += item.quantity;
+      if (item.is_select) selectedTotal += lineTotal;
 
       cartItemsEl.innerHTML += `
-        <div class="cart-item">
+        <div class="cart-item${item.is_select ? '' : ' cart-item--unselected'}" id="cart-item-${idx}">
+          <label class="cart-item-checkbox" title="${item.is_select ? 'Deselect' : 'Select'} item">
+            <input
+              type="checkbox"
+              class="cart-checkbox"
+              ${item.is_select ? 'checked' : ''}
+              onchange="toggleSelect(${idx}, this.checked)"
+              aria-label="Select ${escHtml(item.name)}"
+            >
+            <span class="checkmark"></span>
+          </label>
           <div class="cart-item-info">
             <div class="cart-item-name">${escHtml(item.name)}</div>
-            <div class="cart-item-price">NRs.${itemTotal.toFixed(0)}</div>
+            <div class="cart-item-price">NRs.${(item.price * item.quantity).toFixed(0)}</div>
           </div>
           <div class="cart-actions">
             <button class="qty-btn" onclick="decreaseQty(${idx})" aria-label="Decrease">−</button>
-            <span class="qty-display">${item.qty}</span>
+            <span class="qty-display">${item.quantity}</span>
             <button class="qty-btn" onclick="increaseQty(${idx})" aria-label="Increase">+</button>
             <button class="remove-btn" onclick="removeItem(${idx})" aria-label="Remove">✕</button>
           </div>
         </div>`;
     });
 
-    cartTotalEl.textContent = total.toFixed(2);
+    cartTotalEl.textContent = selectedTotal.toFixed(2);
     updateBadge(totalQty);
   }
 
@@ -150,43 +217,106 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* ── Cart Actions ───────────────────────── */
-  window.increaseQty = function (idx) { cart[idx].qty++; renderCart(); };
-  window.decreaseQty = function (idx) {
-    if (cart[idx].qty > 1) cart[idx].qty--;
-    else cart.splice(idx, 1);
+  window.increaseQty = async function (idx) {
+    cart[idx].quantity++;
+    cart[idx].total_price = cart[idx].price * cart[idx].quantity;
     renderCart();
-  };
-  window.removeItem = function (idx) {
-    const name = cart[idx].name;
-    cart.splice(idx, 1);
-    renderCart();
-    showToast(`Removed ${name}`);
+    if (cart[idx].cart_id) {
+      await apiFetch('/api/cart/update', 'POST', { cart_id: cart[idx].cart_id, quantity: cart[idx].quantity });
+    }
   };
 
-  /* ── Checkout ───────────────────────────── */
+  window.decreaseQty = async function (idx) {
+    if (cart[idx].quantity > 1) {
+      cart[idx].quantity--;
+      cart[idx].total_price = cart[idx].price * cart[idx].quantity;
+      renderCart();
+      if (cart[idx].cart_id) {
+        await apiFetch('/api/cart/update', 'POST', { cart_id: cart[idx].cart_id, quantity: cart[idx].quantity });
+      }
+    } else {
+      await removeItem(idx);
+    }
+  };
+
+  window.removeItem = async function (idx) {
+    const item = cart[idx];
+    const cartId = item.cart_id;
+    cart.splice(idx, 1);
+    renderCart();
+    showToast(`Removed ${item.name}`);
+    if (cartId) {
+      await apiFetch('/api/cart/remove', 'POST', { cart_id: cartId });
+    }
+  };
+
+  window.toggleSelect = async function (idx, checked) {
+    const item = cart[idx];
+    if (!item) return;
+
+    const newVal = checked ? 1 : 0;
+    item.is_select = newVal;
+
+    updateTotalDisplay();
+// alert('cart id'+item.cart_id);
+    if (item.cart_id) {
+      try {
+        await apiFetch('/api/cart/toggle-select', 'POST', {
+          cart_id: item.cart_id,
+          is_select: newVal,
+        });
+      } catch (e) {
+        item.is_select = checked ? 0 : 1;
+        const checkbox = document.querySelector(`#cart-item-${idx} .cart-checkbox`);
+        if (checkbox) checkbox.checked = !checked;
+        updateTotalDisplay();
+        showToast('Failed to update selection');
+      }
+    }
+  };
+
+  function updateTotalDisplay() {
+    let selectedTotal = 0;
+    let totalQty = 0;
+    cart.forEach(item => {
+      totalQty += item.quantity;
+      if (item.is_select) selectedTotal += item.price * item.quantity;
+    });
+    if (cartTotalEl) cartTotalEl.textContent = selectedTotal.toFixed(2);
+    updateBadge(totalQty);
+
+    cart.forEach((item, i) => {
+      const el = document.getElementById(`cart-item-${i}`);
+      if (el) el.classList.toggle('cart-item--unselected', !item.is_select);
+    });
+  }
+
   window.openCheckout = function () {
-    if (!cart.length) { showToast("🛒 Your cart is empty!"); return; }
+    const selectedItems = cart.filter(i => i.is_select);
+    if (!selectedItems.length) {
+      showToast("🛒 Please select at least one item!");
+      return;
+    }
+
+    const uuidInput = document.getElementById('checkout-uuid');
+    if (uuidInput) uuidInput.value = customerUUID;
 
     checkoutItems.innerHTML = "";
     let total = 0;
 
-    cart.forEach(item => {
-      const lineTotal = item.price * item.qty;
+    selectedItems.forEach(item => {
+      const lineTotal = item.price * item.quantity;
       total += lineTotal;
       checkoutItems.innerHTML += `
         <p>
-          <span>${escHtml(item.name)} × ${item.qty}</span>
+          <span>${escHtml(item.name)} × ${item.quantity}</span>
           <span>NRs.${lineTotal.toFixed(0)}</span>
-        </p>
-        <input type="hidden" name="menu_ids[]" value="${item.id}">
-        <input type="hidden" name="quantities[]" value="${item.qty}">`;
+        </p>`;
     });
 
     const totalEl = document.getElementById("checkout-total");
     if (totalEl) totalEl.textContent = total.toFixed(2);
 
-    // Also update display span if exists
     const displayEl = document.getElementById("checkout-total-display");
     if (displayEl) displayEl.textContent = total.toFixed(2);
 
@@ -198,19 +328,20 @@ document.addEventListener("DOMContentLoaded", () => {
     checkoutForm.classList.remove("active");
   };
 
-  // Close checkout on backdrop click
   checkoutForm?.addEventListener("click", function (e) {
     if (e.target === this) closeCheckout();
   });
 
-  /* ── Category Filter ────────────────────── */
+  if (document.querySelector('.alert-success, [data-flash="success"]')) {
+    localStorage.removeItem(UUID_KEY);
+    localStorage.removeItem(UUID_EXPIRY);
+  }
   const categoryBtns = document.querySelectorAll(".category-btn");
   const menuCards    = document.querySelectorAll(".menu-card");
 
   categoryBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       const category = btn.dataset.category;
-
       categoryBtns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
 
@@ -218,9 +349,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const matches = category === "all" || card.dataset.category === category;
         if (matches) {
           card.style.display = "";
-          // Re-trigger animation
           card.style.animation = "none";
-          card.offsetHeight; // reflow
+          card.offsetHeight;
           card.style.animation = `card-reveal 0.5s var(--ease-spring) ${(i % 8) * 0.06}s forwards`;
         } else {
           card.style.display = "none";
@@ -228,13 +358,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   });
-
-  /* ── Mobile Menu Toggle ─────────────────── */
   window.toggleMobileMenu = function () {
     document.getElementById("category-bar")?.classList.toggle("active");
   };
 
-  /* ── Escape key closes panels ───────────── */
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       closeCartFn();
@@ -242,16 +369,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* ── Utility ────────────────────────────── */
   function escHtml(str) {
-    return str
+    return String(str)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
   }
 
-  /* ── Initial Render ─────────────────────── */
-  renderCart();
+  let customerUUID = null;
+
+  (async () => {
+    const now    = Date.now();
+    const stored = localStorage.getItem(UUID_KEY);
+    const expiry = localStorage.getItem(UUID_EXPIRY);
+
+    if (stored && expiry && now < parseInt(expiry)) {
+      customerUUID = stored;
+      await loadCartFromDB();
+    }
+  })();
+
   checkoutForm?.classList.remove("active");
+
 });

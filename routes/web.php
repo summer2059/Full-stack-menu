@@ -18,6 +18,16 @@ Auth::routes(['register' => false, 'reset' => false, 'verify' => false]);
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'index')->name('home-page');
     Route::get('/{token}', 'index')->name('menu.table');
+
+    // Cart API routes
+    Route::post('/api/customer/uuid', 'generateUUID')->name('customer.uuid');
+    Route::post('/api/cart/add', 'addToCart')->name('cart.add');
+    Route::get('/api/cart', 'getCart')->name('cart.get');
+    Route::post('/api/cart/update', 'updateCart')->name('cart.update');
+    Route::post('/api/cart/toggle-select', 'toggleCartSelect')->name('cart.toggle');
+    Route::post('/api/cart/remove', 'removeFromCart')->name('cart.remove');
+
+    // Order submission
     Route::post('/submit-order', 'submit')->name('order.submit');
 });
 Route::middleware(['auth'])->prefix('dashboard')->group(function () {
