@@ -3,22 +3,21 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Dashboard\User\UserRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
-use App\Services\CrudService;
-use Illuminate\Support\Facades\Log;
+use App\Services\Dashboard\User\UserService;
 use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    protected $crudService;
-    protected $modelName;
+    protected UserService $userService;
 
-    public function __construct(CrudService $crudService)
+    public function __construct(UserService $userService)
     {
-        $this->crudService = $crudService;
-        $this->modelName   = 'user';
+        $this->userService = $userService;
     }
 
     public function index()
@@ -29,15 +28,14 @@ class UserController extends Controller
 
         if (request()->ajax()) {
             try {
-                $data = $this->crudService->all($this->modelName);
+                $users = $this->userService->getAllUsers();
 
-                return datatables()->of($data)
+                return datatables()->of($users)
                     ->addIndexColumn()
                     ->addColumn('role', fn($user) => $user->getRoleNames()->implode(', '))
                     ->addColumn('action', function ($user) {
                         $buttons = '';
 
-                        // EDIT — admin only
                         if (auth()->user()->can('user.update')) {
                             $buttons .= '<a href="' . route('user.edit', $user->id) . '"
                                 class="btn btn-sm btn-primary me-1">
@@ -45,7 +43,6 @@ class UserController extends Controller
                             </a>';
                         }
 
-                        // DELETE — admin only
                         if (auth()->user()->can('user.delete')) {
                             $buttons .= '
                                 <form action="' . route('user.destroy', $user->id) . '" method="POST" style="display:inline;">
@@ -81,28 +78,10 @@ class UserController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(UserRequest $request)
     {
         try {
-            $validated = $request->validate([
-                'name'        => 'required|string|max:255',
-                'email'       => 'required|string|email|max:255|unique:users',
-                'password'    => 'required|string|min:6|confirmed',
-                'role'        => 'required|exists:roles,name',
-                'permissions' => 'array',
-            ]);
-
-            $user = User::create([
-                'name'     => $validated['name'],
-                'email'    => $validated['email'],
-                'password' => bcrypt($validated['password']),
-            ]);
-
-            $user->assignRole($validated['role']);
-
-            if (!empty($validated['permissions'])) {
-                $user->syncPermissions($validated['permissions']);
-            }
+            $this->userService->createUser($request->validated());
 
             toast('User created successfully.', 'success');
             return redirect()->route('user.index');
@@ -128,27 +107,10 @@ class UserController extends Controller
         }
     }
 
-    public function update(Request $request, User $user)
+    public function update(UserRequest $request, User $user)
     {
         try {
-            $validated = $request->validate([
-                'name'        => 'required|string|max:255',
-                'email'       => 'required|string|email|max:255|unique:users,email,' . $user->id,
-                'password'    => 'nullable|string|min:6|confirmed',
-                'role'        => 'required|exists:roles,name',
-                'permissions' => 'array',
-            ]);
-
-            $user->name  = $validated['name'];
-            $user->email = $validated['email'];
-
-            if (!empty($validated['password'])) {
-                $user->password = bcrypt($validated['password']);
-            }
-
-            $user->save();
-            $user->syncRoles([$validated['role']]);
-            $user->syncPermissions($validated['permissions'] ?? []);
+            $this->userService->updateUser($user, $request->validated());
 
             toast('User updated successfully.', 'success');
             return redirect()->route('user.index');
@@ -162,7 +124,7 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         try {
-            $user->delete();
+            $this->userService->deleteUser($user);
             toast('User deleted successfully.', 'success');
         } catch (Exception $e) {
             Log::error('User delete error: ' . $e->getMessage());
@@ -173,7 +135,7 @@ class UserController extends Controller
 
     public function getPermissionsByRole(Request $request)
     {
-        $role = \Spatie\Permission\Models\Role::where('name', $request->role)->first();
+        $role = Role::where('name', $request->role)->first();
 
         if (!$role) {
             return response()->json([]);
@@ -184,7 +146,7 @@ class UserController extends Controller
 
         foreach ($permissions as $perm) {
             [$module, $action] = explode('.', $perm, 2);
-            $module = ucfirst(str_replace('_', ' ', $module));
+            $module            = ucfirst(str_replace('_', ' ', $module));
             $grouped[$module][] = $perm;
         }
 

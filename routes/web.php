@@ -8,6 +8,7 @@ use App\Http\Controllers\Dashboard\MenuCategoryController;
 use App\Http\Controllers\Dashboard\MenuController;
 use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\RecipeController;
+use App\Http\Controllers\Dashboard\RoleController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\FrontendController;
 use Illuminate\Support\Facades\Auth;
@@ -84,6 +85,15 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
         Route::put('/{user}', [UserController::class, 'update'])->middleware('permission:user.update')->name('update');
         Route::delete('/{user}', [UserController::class, 'destroy'])->middleware('permission:user.delete')->name('destroy');
         Route::post('/role-permissions', [UserController::class, 'getPermissionsByRole'])->middleware('permission:user.view')->name('role.permissions');
+    });
+
+    Route::prefix('role')->name('role.')->group(function () {
+        Route::get('/', [RoleController::class, 'index'])->middleware('permission:role.view')->name('index');
+        Route::get('/create', [RoleController::class, 'create'])->middleware('permission:role.create')->name('create');
+        Route::post('/', [RoleController::class, 'store'])->middleware('permission:role.create')->name('store');
+        Route::get('/{role}/edit', [RoleController::class, 'edit'])->middleware('permission:role.update')->name('edit');
+        Route::put('/{role}', [RoleController::class, 'update'])->middleware('permission:role.update')->name('update');
+        Route::delete('/{role}', [RoleController::class, 'destroy'])->middleware('permission:role.delete')->name('destroy');
     });
 
     Route::prefix('site-settings')->group(function () {

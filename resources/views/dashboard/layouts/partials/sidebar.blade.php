@@ -30,9 +30,6 @@
                         <div><h6 class="lan-1">General</h6></div>
                     </li>
 
-                    {{-- ═══════════════════════════════════════════════
-                         DASHBOARD — all roles
-                    ════════════════════════════════════════════════ --}}
                     @can('dashboard.view')
                     <li class="sidebar-list" style="{{ request()->routeIs('index') ? 'background-color: #708090;' : '' }}">
                         <i class="fa fa-thumb-tack"></i>
@@ -48,10 +45,6 @@
                     </li>
                     @endcan
 
-                    {{-- ═══════════════════════════════════════════════
-                         INVENTORY — manager + inventory_manager
-                         Sub-items gated individually
-                    ════════════════════════════════════════════════ --}}
                     @canany(['inventory.view', 'inventory.forecast', 'recipe.view'])
                     <li class="sidebar-list {{ request()->routeIs('inventory.index', 'inventory.create', 'inventory.edit', 'inventory.forecast', 'recipe.index', 'recipe.edit') ? 'open' : '' }}">
                         <a class="sidebar-link sidebar-title" data-toggle="dropdown">
@@ -90,10 +83,6 @@
                     </li>
                     @endcanany
 
-                    {{-- ═══════════════════════════════════════════════
-                         MENU — manager, reception, kitchen, food_server
-                         Sub-items gated individually
-                    ════════════════════════════════════════════════ --}}
                     @can('menu_category.view')
                     <li class="sidebar-list {{ request()->routeIs('menu-category.index', 'menu-category.create', 'menu-category.edit', 'menu.index', 'menu.create', 'menu.edit') ? 'open' : '' }}">
                         <a class="sidebar-link sidebar-title" data-toggle="dropdown">
@@ -125,10 +114,6 @@
                     </li>
                     @endcan
 
-                    {{-- ═══════════════════════════════════════════════
-                         ORDERS — all roles except inventory_manager
-                         Sub-items gated individually
-                    ════════════════════════════════════════════════ --}}
                     @can('order.view')
                     <li class="sidebar-list {{ request()->routeIs('order.index', 'order.byTable', 'order.completed') ? 'open' : '' }}">
                         <a class="sidebar-link sidebar-title" data-toggle="dropdown">
@@ -157,10 +142,6 @@
                         </ul>
                     </li>
                     @endcan
-
-                    {{-- ═══════════════════════════════════════════════
-                         QR CODES — admin, manager, reception
-                    ════════════════════════════════════════════════ --}}
                     @can('qr_code.view')
                     <li class="sidebar-list" style="{{ request()->routeIs('qr-codes') ? 'background-color: #708090;' : '' }}">
                         <i class="fa fa-thumb-tack"></i>
@@ -175,10 +156,6 @@
                         </a>
                     </li>
                     @endcan
-
-                    {{-- ═══════════════════════════════════════════════
-                         SITE SETTINGS — admin only
-                    ════════════════════════════════════════════════ --}}
                     @can('site_setting.view')
                     <li class="sidebar-list" style="{{ request()->routeIs('settings') ? 'background-color: #708090;' : '' }}">
                         <i class="fa fa-thumb-tack"></i>
@@ -194,17 +171,31 @@
                     </li>
                     @endcan
                     @can('user.view')
-                    <li class="sidebar-list" style="{{ request()->routeIs('user.index') ? 'background-color: #708090;' : '' }}">
-                        <i class="fa fa-thumb-tack"></i>
-                        <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.index') }}">
+                    <li class="sidebar-list {{ request()->routeIs('user.index', 'role.index') ? 'open' : '' }}">
+                        <a class="sidebar-link sidebar-title" data-toggle="dropdown">
                             <svg class="stroke-icon">
-                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-board"></use>
+                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#stroke-gallery"></use>
                             </svg>
                             <svg class="fill-icon">
-                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-board"></use>
+                                <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#fill-gallery"></use>
                             </svg>
                             <span>User Management</span>
                         </a>
+                        <ul class="sidebar-submenu {{ request()->routeIs('user.index', 'role.index') ? 'd-block' : '' }}">
+
+                            <li>
+                                <a style="{{ request()->routeIs('user.index', 'user.index') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('user.index') }}">User</a>
+                            </li>
+
+                            @can('role.view')
+                            <li>
+                                <a style="{{ request()->routeIs('role.index') ? 'background-color: #708090;' : '' }}"
+                                    href="{{ route('role.index') }}">Roles</a>
+                            </li>
+                            @endcan
+
+                        </ul>
                     </li>
                     @endcan
 
