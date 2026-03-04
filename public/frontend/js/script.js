@@ -66,13 +66,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ── Header scroll ─────────────────────────
   const header = document.querySelector("header");
   window.addEventListener("scroll", () => {
     header?.classList.toggle("scrolled", window.scrollY > 10);
   }, { passive: true });
 
-  // ── Toast ─────────────────────────────────
   function showToast(message) {
     const container = document.querySelector(".toast-container") || (() => {
       const el = document.createElement("div");
@@ -87,7 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => toast.remove(), 2600);
   }
 
-  // ── Cart open/close (NO scroll lock changes on qty update) ──
   function openCart() {
     cartBox.classList.add("active");
     backdrop?.classList.add("active");
@@ -113,13 +110,13 @@ document.addEventListener("DOMContentLoaded", () => {
       cartBox.classList.contains("active") &&
       !cartBox.contains(e.target) &&
       !e.target.closest(".toggle-cart") &&
-      !e.target.closest(".cart-btn")
+      !e.target.closest(".cart-btn") &&
+      !e.target.closest(".rec-add-btn")
     ) {
       closeCartFn();
     }
   });
 
-  // ── Add to Cart ───────────────────────────
   window.addToCart = async function (id, name, price) {
     if (!customerUUID) {
       customerUUID = await getOrCreateUUID();
@@ -132,6 +129,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       cart.push({ cart_id: null, menu_id: id, name, price: parseFloat(price), quantity: 1, total_price: parseFloat(price), is_select: 1, note: '' });
     }
+
+    const cartIsOpen = cartBox.classList.contains("active");
     renderCart();
 
     const btn = document.querySelector(`[data-item-id="${id}"]`);
@@ -144,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 1200);
     }
 
-    openCart();
+    if (!cartIsOpen) openCart();
     showToast(`🛒 ${name} added to cart`);
 
     try {
@@ -160,7 +159,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // ── Render Cart ───────────────────────────
   function renderCart() {
     cartItemsEl.innerHTML = "";
 
@@ -214,7 +212,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderRecommended();
   }
 
-  // ── Recommended in Cart ───────────────────
   function renderRecommended() {
     let recEl = document.getElementById('cart-recommended');
     if (!recEl) {
@@ -255,7 +252,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ── Qty: pass event to stop propagation ──
   window.increaseQty = async function (e, idx) {
     e.stopPropagation();
     cart[idx].quantity++;
@@ -282,7 +278,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Update just the qty + price in DOM without full re-render (prevents cart closing)
   function updateCartItemEl(idx) {
     const el = document.getElementById(`cart-item-${idx}`);
     if (!el) return;
@@ -321,7 +316,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // ── Per-item note ─────────────────────────
   window.updateItemNote = function (idx, value) {
     if (cart[idx]) cart[idx].note = value;
   };
@@ -341,7 +335,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ── Checkout ──────────────────────────────
   window.openCheckout = function () {
     const selectedItems = cart.filter(i => i.is_select);
     if (!selectedItems.length) {
@@ -355,7 +348,6 @@ document.addEventListener("DOMContentLoaded", () => {
     checkoutItems.innerHTML = "";
     let total = 0;
 
-    // Render each item row with its own visible note input + hidden fields
     selectedItems.forEach((item, i) => {
       const lineTotal = item.price * item.quantity;
       total += lineTotal;
@@ -394,7 +386,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target === this) closeCheckout();
   });
 
-  // ── Category Filter ───────────────────────
   const categoryBtns = document.querySelectorAll(".category-btn");
   const menuCards    = document.querySelectorAll(".menu-card");
 
@@ -437,13 +428,12 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/"/g, "&quot;");
   }
 
-  // ── Clear UUID on success ─────────────────
   if (document.querySelector('.alert-success, [data-flash="success"]')) {
+    showTrackOrderBtn();
     localStorage.removeItem(UUID_KEY);
     localStorage.removeItem(UUID_EXPIRY);
   }
 
-  // ── Track Order Modal ─────────────────────
   window.openTrackOrder = async function () {
     if (!customerUUID) { showToast('No active session found.'); return; }
     const modal = document.getElementById('track-order-modal');
@@ -466,7 +456,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!container) return;
     try {
       const data = await apiFetch(`/api/orders/track?uuid=${encodeURIComponent(customerUUID)}`);
-      console.log(data);
       const orders = data.orders || [];
 
       if (!orders.length) {
@@ -529,7 +518,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // ── Init ──────────────────────────────────
+  function showTrackOrderBtn() {
+    document.getElementById('track-order-btn')?.style.setProperty('display', 'flex');
+    document.getElementById('track-order-hamburger')?.style.setProperty('display', 'flex');
+  }
+
+  function hideTrackOrderBtn() {
+    document.getElementById('track-order-btn')?.style.setProperty('display', 'none');
+    document.getElementById('track-order-hamburger')?.style.setProperty('display', 'none');
+  }
+
+  async function checkActiveOrders() {
+    if (!customerUUID) return;
+    try {
+      const data   = await apiFetch(`/api/orders/track?uuid=${encodeURIComponent(customerUUID)}`);
+      const orders = data.orders || [];
+      orders.length ? showTrackOrderBtn() : hideTrackOrderBtn();
+    } catch (e) {
+      console.error('Failed to check active orders:', e);
+    }
+  }
+
   let customerUUID = null;
 
   (async () => {
@@ -540,6 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (stored && expiry && now < parseInt(expiry)) {
       customerUUID = stored;
       await loadCartFromDB();
+      await checkActiveOrders();
     }
   })();
 
