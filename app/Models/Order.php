@@ -16,6 +16,7 @@ class Order extends Model
         'total_price',
         'table_number',
         'note',
+        'cancel_remark',
         'status',
     ];
 

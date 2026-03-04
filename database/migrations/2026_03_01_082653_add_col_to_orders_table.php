@@ -15,6 +15,7 @@ return new class extends Migration
 
             // Add note column
             $table->text('note')->nullable()->after('table_number');
+            $table->text('cancel_remark')->nullable()->after('note');
         });
     }
 

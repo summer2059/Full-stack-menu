@@ -10,7 +10,6 @@ use App\Http\Requests\Frontend\UpdateCartRequest;
 use App\Services\FrontendService;
 use Illuminate\Http\Request;
 
-
 class FrontendController extends Controller
 {
     public function __construct(
@@ -21,7 +20,6 @@ class FrontendController extends Controller
     {
         $menuItems   = $this->service->getMenuItems();
         $tableNumber = $this->service->decryptTableToken($token);
-        
 
         return view('frontend.index', compact('menuItems', 'tableNumber'));
     }
@@ -88,5 +86,38 @@ class FrontendController extends Controller
         toast('Order submitted successfully!', 'success');
 
         return redirect()->back();
+    }
+
+    /**
+     * Track orders by customer UUID.
+     */
+    public function trackOrders(Request $request)
+    {
+        $uuid   = $request->query('uuid');
+        $orders = $this->service->getOrdersByUUID($uuid);
+
+        return response()->json(['orders' => $orders]);
+    }
+
+    /**
+     * Cancel a pending order with optional remark.
+     */
+    public function cancelOrder(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|integer|exists:orders,id',
+            'remark'   => 'nullable|string|max:500',
+        ]);
+
+        $result = $this->service->cancelOrder(
+            $request->order_id,
+            $request->remark
+        );
+
+        if (!$result['success']) {
+            return response()->json(['success' => false, 'message' => $result['message']], 422);
+        }
+
+        return response()->json(['success' => true]);
     }
 }

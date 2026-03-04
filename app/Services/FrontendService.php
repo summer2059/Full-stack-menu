@@ -18,10 +18,7 @@ class FrontendService
 
     public function decryptTableToken(?string $token): ?string
     {
-        if (!$token) {
-            return null;
-        }
-
+        if (!$token) return null;
         try {
             return Crypt::decryptString($token);
         } catch (\Exception $e) {
@@ -33,7 +30,6 @@ class FrontendService
     {
         $uuid = (string) Str::uuid();
         Customer::create(['uuid' => $uuid]);
-
         return $uuid;
     }
 
@@ -44,15 +40,12 @@ class FrontendService
             ['name' => null, 'phone' => null]
         );
 
-        $menu = Menu::findOrFail($menuId);
-
+        $menu     = Menu::findOrFail($menuId);
         $cartItem = Cart::where('customer_id', $customer->id)->where('menu_id', $menuId)->first();
 
         if ($cartItem) {
             $cartItem->increment('quantity');
-            $cartItem->update([
-                'total_price' => $menu->price * $cartItem->quantity,
-            ]);
+            $cartItem->update(['total_price' => $menu->price * $cartItem->quantity]);
         } else {
             Cart::create([
                 'customer_id' => $customer->id,
@@ -70,35 +63,27 @@ class FrontendService
     {
         $customer = Customer::where('uuid', $uuid)->first();
 
-        if (!$customer) {
-            return ['items' => [], 'total' => 0];
-        }
+        if (!$customer) return ['items' => [], 'total' => 0];
 
         $items = Cart::where('customer_id', $customer->id)
             ->with('menu')
             ->get()
-            ->map(function ($cart) {
-                return [
-                    'cart_id'     => $cart->id,
-                    'menu_id'     => $cart->menu_id,
-                    'name'        => $cart->menu?->title ?? 'Unknown',
-                    'price'       => (float) ($cart->menu?->price ?? 0),
-                    'quantity'    => (int) $cart->quantity,
-                    'total_price' => (float) $cart->total_price,
-                    'is_select'   => (int) $cart->is_select,
-                ];
-            })
+            ->map(fn($cart) => [
+                'cart_id'     => $cart->id,
+                'menu_id'     => $cart->menu_id,
+                'name'        => $cart->menu?->title ?? 'Unknown',
+                'price'       => (float) ($cart->menu?->price ?? 0),
+                'quantity'    => (int) $cart->quantity,
+                'total_price' => (float) $cart->total_price,
+                'is_select'   => (int) $cart->is_select,
+                'note'        => $cart->note ?? '',
+            ])
             ->values()
             ->toArray();
 
-        $total = collect($items)
-            ->where('is_select', 1)
-            ->sum('total_price');
+        $total = collect($items)->where('is_select', 1)->sum('total_price');
 
-        return [
-            'items' => $items,
-            'total' => $total,
-        ];
+        return ['items' => $items, 'total' => $total];
     }
 
     public function updateCart(int $cartId, int $quantity): void
@@ -111,7 +96,6 @@ class FrontendService
         }
 
         $menu = Menu::findOrFail($cart->menu_id);
-
         $cart->update([
             'quantity'    => $quantity,
             'total_price' => $menu->price * $quantity,
@@ -140,6 +124,16 @@ class FrontendService
         if ($selectedItems->isEmpty()) {
             throw new \Exception('No items selected for order.');
         }
+
+        $noteMap = [];
+        if (!empty($data['items']) && is_array($data['items'])) {
+            foreach ($data['items'] as $item) {
+                if (isset($item['menu_id'])) {
+                    $noteMap[(int) $item['menu_id']] = $item['note'] ?? null;
+                }
+            }
+        }
+
         foreach ($selectedItems as $item) {
             Order::create([
                 'customer_id'  => $customer->id,
@@ -147,10 +141,50 @@ class FrontendService
                 'quantity'     => $item->quantity,
                 'total_price'  => $item->total_price,
                 'table_number' => $data['table'],
-                'note'         => $data['note'] ?? null,
+                'note'         => $noteMap[$item->menu_id] ?? ($data['note'] ?? null),
                 'status'       => 'pending',
+                'cancel_remark'=> null,
             ]);
         }
         Cart::where('customer_id', $customer->id)->where('is_select', 1)->delete();
+    }
+
+    public function getOrdersByUUID(string $uuid): array
+    {
+        $customer = Customer::where('uuid', $uuid)->first();
+        if (!$customer) return [];
+
+        return Order::where('customer_id', $customer->id)
+            ->whereNotIn('status', ['delivered'])
+            ->with('menu')
+            ->latest()
+            ->get()
+            ->map(fn($order) => [
+                'id'           => $order->id,
+                'menu_name'    => $order->menu?->title ?? 'Unknown',
+                'quantity'     => $order->quantity,
+                'total_price'  => $order->total_price,
+                'table_number' => $order->table_number,
+                'note'         => $order->note,
+                'status'       => $order->status,
+                'cancel_remark'=> $order->cancel_remark,
+            ])
+            ->toArray();
+    }
+
+    public function cancelOrder(int $orderId, ?string $remark): array
+    {
+        $order = Order::find($orderId);
+        if (!$order) {
+            return ['success' => false, 'message' => 'Order not found.'];
+        }
+        if ($order->status !== 'pending') {
+            return ['success' => false, 'message' => 'Only pending orders can be cancelled.'];
+        }
+        $order->update([
+            'status'        => 'cancelled',
+            'cancel_remark' => $remark,
+        ]);
+        return ['success' => true];
     }
 }

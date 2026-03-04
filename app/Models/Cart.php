@@ -8,13 +8,25 @@ use Illuminate\Database\Eloquent\Model;
 class Cart extends Model
 {
     use HasFactory;
+
     protected $table = 'carts';
-    // protected $guarded = [];
-    protected $fillable = ['customer_id', 'menu_id', 'quantity', 'total_price', 'is_select'];
-    public function customer(){
+
+    protected $fillable = [
+        'customer_id',
+        'menu_id',
+        'quantity',
+        'total_price',
+        'is_select',
+        'note',
+    ];
+
+    public function customer()
+    {
         return $this->belongsTo(Customer::class);
     }
-    public function menu(){
+
+    public function menu()
+    {
         return $this->belongsTo(Menu::class);
     }
 }

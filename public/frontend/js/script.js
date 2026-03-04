@@ -2,8 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const UUID_KEY    = 'customer_uuid';
   const UUID_EXPIRY = 'customer_uuid_expiry';
-  const TTL_MS      = 1  * 60 * 1000; // 1 minute (testing) increase 24 * 60 * 60 * 1000 for production
-  //todo : localStorage re;
+  const TTL_MS      = 24 * 60 * 60 * 1000; // 24 hours for production
 
   async function getOrCreateUUID() {
     const now    = Date.now();
@@ -19,19 +18,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     localStorage.setItem(UUID_KEY, uuid);
     localStorage.setItem(UUID_EXPIRY, (now + TTL_MS).toString());
-    // scheduleExpiry();
     return uuid;
   }
-  function scheduleExpiry(delay) {
-  setTimeout(() => {
-    localStorage.removeItem(UUID_KEY);
-    localStorage.removeItem(UUID_EXPIRY);
-    customerUUID = null;
-    console.log("UUID expired and removed.");
-  }, delay);
-}
 
-  let cart = []; // [{ cart_id, menu_id, name, price, quantity, total_price, is_select }]
+  function scheduleExpiry(delay) {
+    setTimeout(() => {
+      localStorage.removeItem(UUID_KEY);
+      localStorage.removeItem(UUID_EXPIRY);
+      customerUUID = null;
+    }, delay);
+  }
+
+  let cart = []; // [{ cart_id, menu_id, name, price, quantity, total_price, is_select, note }]
+  let recommendedMenus = window.MENU_ITEMS || []; // injected from blade
 
   const cartBox       = document.getElementById("cart");
   const cartItemsEl   = document.getElementById("cart-items");
@@ -67,11 +66,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // ── Header scroll ─────────────────────────
   const header = document.querySelector("header");
   window.addEventListener("scroll", () => {
     header?.classList.toggle("scrolled", window.scrollY > 10);
   }, { passive: true });
 
+  // ── Toast ─────────────────────────────────
   function showToast(message) {
     const container = document.querySelector(".toast-container") || (() => {
       const el = document.createElement("div");
@@ -86,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => toast.remove(), 2600);
   }
 
+  // ── Cart open/close (NO scroll lock changes on qty update) ──
   function openCart() {
     cartBox.classList.add("active");
     backdrop?.classList.add("active");
@@ -117,6 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // ── Add to Cart ───────────────────────────
   window.addToCart = async function (id, name, price) {
     if (!customerUUID) {
       customerUUID = await getOrCreateUUID();
@@ -127,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
       existing.quantity++;
       existing.total_price = existing.price * existing.quantity;
     } else {
-      cart.push({ cart_id: null, menu_id: id, name, price: parseFloat(price), quantity: 1, total_price: parseFloat(price), is_select: 1 });
+      cart.push({ cart_id: null, menu_id: id, name, price: parseFloat(price), quantity: 1, total_price: parseFloat(price), is_select: 1, note: '' });
     }
     renderCart();
 
@@ -157,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // ── Render Cart ───────────────────────────
   function renderCart() {
     cartItemsEl.innerHTML = "";
 
@@ -168,6 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>`;
       cartTotalEl.textContent = "0.00";
       updateBadge(0);
+      renderRecommended();
       return;
     }
 
@@ -196,16 +201,48 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="cart-item-price">NRs.${(item.price * item.quantity).toFixed(0)}</div>
           </div>
           <div class="cart-actions">
-            <button class="qty-btn" onclick="decreaseQty(${idx})" aria-label="Decrease">−</button>
+            <button class="qty-btn" onclick="decreaseQty(event, ${idx})" aria-label="Decrease">−</button>
             <span class="qty-display">${item.quantity}</span>
-            <button class="qty-btn" onclick="increaseQty(${idx})" aria-label="Increase">+</button>
-            <button class="remove-btn" onclick="removeItem(${idx})" aria-label="Remove">✕</button>
+            <button class="qty-btn" onclick="increaseQty(event, ${idx})" aria-label="Increase">+</button>
+            <button class="remove-btn" onclick="removeItem(event, ${idx})" aria-label="Remove">✕</button>
           </div>
         </div>`;
     });
 
     cartTotalEl.textContent = selectedTotal.toFixed(2);
     updateBadge(totalQty);
+    renderRecommended();
+  }
+
+  // ── Recommended in Cart ───────────────────
+  function renderRecommended() {
+    let recEl = document.getElementById('cart-recommended');
+    if (!recEl) {
+      recEl = document.createElement('div');
+      recEl.id = 'cart-recommended';
+      cartItemsEl.appendChild(recEl);
+    }
+
+    const cartMenuIds = cart.map(i => i.menu_id);
+    const available   = recommendedMenus.filter(m => !cartMenuIds.includes(m.id));
+    const picks       = available.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+    if (!picks.length) { recEl.innerHTML = ''; return; }
+
+    recEl.innerHTML = `
+      <div class="rec-header">You might also like</div>
+      <div class="rec-list">
+        ${picks.map(m => `
+          <div class="rec-item">
+            <img src="${m.image_url}" alt="${escHtml(m.title)}" class="rec-img" loading="lazy">
+            <div class="rec-info">
+              <div class="rec-name">${escHtml(m.title)}</div>
+              <div class="rec-price">NRs.${Number(m.price).toFixed(0)}</div>
+            </div>
+            <button class="rec-add-btn" onclick="addToCart(${m.id}, '${escHtml(m.title).replace(/'/g,"\\'")}', ${m.price})">+</button>
+          </div>
+        `).join('')}
+      </div>`;
   }
 
   function updateBadge(count) {
@@ -218,30 +255,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  window.increaseQty = async function (idx) {
+  // ── Qty: pass event to stop propagation ──
+  window.increaseQty = async function (e, idx) {
+    e.stopPropagation();
     cart[idx].quantity++;
     cart[idx].total_price = cart[idx].price * cart[idx].quantity;
-    renderCart();
+    updateTotalDisplay();
+    updateCartItemEl(idx);
     if (cart[idx].cart_id) {
       await apiFetch('/api/cart/update', 'POST', { cart_id: cart[idx].cart_id, quantity: cart[idx].quantity });
     }
   };
 
-  window.decreaseQty = async function (idx) {
+  window.decreaseQty = async function (e, idx) {
+    e.stopPropagation();
     if (cart[idx].quantity > 1) {
       cart[idx].quantity--;
       cart[idx].total_price = cart[idx].price * cart[idx].quantity;
-      renderCart();
+      updateTotalDisplay();
+      updateCartItemEl(idx);
       if (cart[idx].cart_id) {
         await apiFetch('/api/cart/update', 'POST', { cart_id: cart[idx].cart_id, quantity: cart[idx].quantity });
       }
     } else {
-      await removeItem(idx);
+      await removeItem(e, idx);
     }
   };
 
-  window.removeItem = async function (idx) {
-    const item = cart[idx];
+  // Update just the qty + price in DOM without full re-render (prevents cart closing)
+  function updateCartItemEl(idx) {
+    const el = document.getElementById(`cart-item-${idx}`);
+    if (!el) return;
+    el.querySelector('.qty-display').textContent = cart[idx].quantity;
+    el.querySelector('.cart-item-price').textContent = `NRs.${(cart[idx].price * cart[idx].quantity).toFixed(0)}`;
+  }
+
+  window.removeItem = async function (e, idx) {
+    e.stopPropagation();
+    const item   = cart[idx];
     const cartId = item.cart_id;
     cart.splice(idx, 1);
     renderCart();
@@ -254,18 +305,12 @@ document.addEventListener("DOMContentLoaded", () => {
   window.toggleSelect = async function (idx, checked) {
     const item = cart[idx];
     if (!item) return;
-
     const newVal = checked ? 1 : 0;
     item.is_select = newVal;
-
     updateTotalDisplay();
-// alert('cart id'+item.cart_id);
     if (item.cart_id) {
       try {
-        await apiFetch('/api/cart/toggle-select', 'POST', {
-          cart_id: item.cart_id,
-          is_select: newVal,
-        });
+        await apiFetch('/api/cart/toggle-select', 'POST', { cart_id: item.cart_id, is_select: newVal });
       } catch (e) {
         item.is_select = checked ? 0 : 1;
         const checkbox = document.querySelector(`#cart-item-${idx} .cart-checkbox`);
@@ -274,6 +319,11 @@ document.addEventListener("DOMContentLoaded", () => {
         showToast('Failed to update selection');
       }
     }
+  };
+
+  // ── Per-item note ─────────────────────────
+  window.updateItemNote = function (idx, value) {
+    if (cart[idx]) cart[idx].note = value;
   };
 
   function updateTotalDisplay() {
@@ -285,13 +335,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     if (cartTotalEl) cartTotalEl.textContent = selectedTotal.toFixed(2);
     updateBadge(totalQty);
-
     cart.forEach((item, i) => {
       const el = document.getElementById(`cart-item-${i}`);
       if (el) el.classList.toggle('cart-item--unselected', !item.is_select);
     });
   }
 
+  // ── Checkout ──────────────────────────────
   window.openCheckout = function () {
     const selectedItems = cart.filter(i => i.is_select);
     if (!selectedItems.length) {
@@ -305,19 +355,30 @@ document.addEventListener("DOMContentLoaded", () => {
     checkoutItems.innerHTML = "";
     let total = 0;
 
-    selectedItems.forEach(item => {
+    // Render each item row with its own visible note input + hidden fields
+    selectedItems.forEach((item, i) => {
       const lineTotal = item.price * item.quantity;
       total += lineTotal;
       checkoutItems.innerHTML += `
-        <p>
-          <span>${escHtml(item.name)} × ${item.quantity}</span>
-          <span>NRs.${lineTotal.toFixed(0)}</span>
-        </p>`;
+        <div class="checkout-item-row">
+          <div class="checkout-item-top">
+            <span class="checkout-item-name">${escHtml(item.name)} <em class="checkout-item-qty">× ${item.quantity}</em></span>
+            <span class="checkout-item-price">NRs.${lineTotal.toFixed(0)}</span>
+          </div>
+          <input
+            type="text"
+            class="checkout-item-note"
+            name="items[${i}][note]"
+            placeholder="Note for ${escHtml(item.name)} (optional)"
+            value="${escHtml(item.note || '')}"
+            autocomplete="off"
+          >
+          <input type="hidden" name="items[${i}][menu_id]" value="${item.menu_id}">
+        </div>`;
     });
 
     const totalEl = document.getElementById("checkout-total");
     if (totalEl) totalEl.textContent = total.toFixed(2);
-
     const displayEl = document.getElementById("checkout-total-display");
     if (displayEl) displayEl.textContent = total.toFixed(2);
 
@@ -333,10 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target === this) closeCheckout();
   });
 
-  if (document.querySelector('.alert-success, [data-flash="success"]')) {
-    localStorage.removeItem(UUID_KEY);
-    localStorage.removeItem(UUID_EXPIRY);
-  }
+  // ── Category Filter ───────────────────────
   const categoryBtns = document.querySelectorAll(".category-btn");
   const menuCards    = document.querySelectorAll(".menu-card");
 
@@ -345,7 +403,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const category = btn.dataset.category;
       categoryBtns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-
       menuCards.forEach((card, i) => {
         const matches = category === "all" || card.dataset.category === category;
         if (matches) {
@@ -359,6 +416,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   });
+
   window.toggleMobileMenu = function () {
     document.getElementById("category-bar")?.classList.toggle("active");
   };
@@ -367,6 +425,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") {
       closeCartFn();
       closeCheckout();
+      closeTrackOrder();
     }
   });
 
@@ -378,6 +437,99 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/"/g, "&quot;");
   }
 
+  // ── Clear UUID on success ─────────────────
+  if (document.querySelector('.alert-success, [data-flash="success"]')) {
+    localStorage.removeItem(UUID_KEY);
+    localStorage.removeItem(UUID_EXPIRY);
+  }
+
+  // ── Track Order Modal ─────────────────────
+  window.openTrackOrder = async function () {
+    if (!customerUUID) { showToast('No active session found.'); return; }
+    const modal = document.getElementById('track-order-modal');
+    modal?.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    await refreshOrderStatus();
+  };
+
+  window.closeTrackOrder = function () {
+    document.getElementById('track-order-modal')?.classList.remove('active');
+    document.body.style.overflow = '';
+    clearInterval(trackInterval);
+    trackInterval = null;
+  };
+
+  let trackInterval = null;
+
+  async function refreshOrderStatus() {
+    const container = document.getElementById('track-order-list');
+    if (!container) return;
+    try {
+      const data = await apiFetch(`/api/orders/track?uuid=${encodeURIComponent(customerUUID)}`);
+      console.log(data);
+      const orders = data.orders || [];
+
+      if (!orders.length) {
+        container.innerHTML = `<div class="track-empty"><span>📋</span><p>No active orders found.</p></div>`;
+        return;
+      }
+
+      container.innerHTML = orders.map(order => {
+        const steps   = ['pending', 'preparing', 'ready', 'delivered'];
+        const stepIdx = steps.indexOf(order.status);
+        const stepsHtml = steps.map((s, i) => `
+          <div class="track-step ${i <= stepIdx ? 'done' : ''} ${i === stepIdx ? 'active' : ''}">
+            <div class="track-step-dot"></div>
+            <div class="track-step-label">${s.charAt(0).toUpperCase() + s.slice(1)}</div>
+          </div>`).join('');
+
+        const canCancel = order.status === 'pending';
+
+        return `
+          <div class="track-order-card">
+            <div class="track-order-top">
+              <div>
+                <div class="track-order-name">${escHtml(order.menu_name)}</div>
+                <div class="track-order-meta">Qty: ${order.quantity} &nbsp;·&nbsp; NRs.${Number(order.total_price).toFixed(0)} &nbsp;·&nbsp; Table ${order.table_number}</div>
+                ${order.note ? `<div class="track-order-note">📝 ${escHtml(order.note)}</div>` : ''}
+              </div>
+              <span class="track-status-badge track-status-${order.status}">${order.status}</span>
+            </div>
+            <div class="track-steps">${stepsHtml}</div>
+            ${canCancel ? `
+              <div class="track-cancel-wrap" id="cancel-wrap-${order.id}">
+                <input type="text" class="track-cancel-input" id="cancel-remark-${order.id}" placeholder="Reason for cancellation (optional)">
+                <button class="track-cancel-btn" onclick="cancelOrder(${order.id})">Cancel Order</button>
+              </div>` : ''}
+          </div>`;
+      }).join('');
+
+      if (!trackInterval) {
+        trackInterval = setInterval(refreshOrderStatus, 15000);
+      }
+    } catch (e) {
+      console.error('Track order error:', e);
+    }
+  }
+
+  window.cancelOrder = async function (orderId) {
+    const remark  = document.getElementById(`cancel-remark-${orderId}`)?.value || '';
+    const confirm = window.confirm('Are you sure you want to cancel this order?');
+    if (!confirm) return;
+    try {
+      const data = await apiFetch('/api/orders/cancel', 'POST', { order_id: orderId, remark });
+      if (data.success) {
+        showToast('Order cancelled.');
+        await refreshOrderStatus();
+      } else {
+        showToast(data.message || 'Could not cancel order.');
+      }
+    } catch (e) {
+      showToast('Failed to cancel order.');
+    }
+  };
+
+  // ── Init ──────────────────────────────────
   let customerUUID = null;
 
   (async () => {
@@ -392,5 +544,4 @@ document.addEventListener("DOMContentLoaded", () => {
   })();
 
   checkoutForm?.classList.remove("active");
-
 });

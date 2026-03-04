@@ -27,6 +27,8 @@ Route::controller(FrontendController::class)->group(function () {
     Route::post('/api/cart/update', 'updateCart')->name('cart.update');
     Route::post('/api/cart/toggle-select', 'toggleCartSelect')->name('cart.toggle');
     Route::post('/api/cart/remove', 'removeFromCart')->name('cart.remove');
+    Route::get('api/orders/track', 'trackOrders')->name('orders.track');
+    Route::post('api/orders/cancel', 'cancelOrder')->name('orders.cancel');
 
     // Order submission
     Route::post('/submit-order', 'submit')->name('order.submit');

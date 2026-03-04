@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('quantity')->default(1);
             $table->decimal('total_price', 8, 2);
             $table->boolean('is_select')->default(1);
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }
