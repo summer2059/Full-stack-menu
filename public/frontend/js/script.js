@@ -66,11 +66,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Header scroll
   const header = document.querySelector("header");
   window.addEventListener("scroll", () => {
     header?.classList.toggle("scrolled", window.scrollY > 10);
   }, { passive: true });
 
+  // Toast 
   function showToast(message) {
     const container = document.querySelector(".toast-container") || (() => {
       const el = document.createElement("div");
@@ -85,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => toast.remove(), 2600);
   }
 
+  // Cart open/close (NO scroll lock changes on qty update)
   function openCart() {
     cartBox.classList.add("active");
     backdrop?.classList.add("active");
@@ -117,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  //Add to Cart 
   window.addToCart = async function (id, name, price) {
     if (!customerUUID) {
       customerUUID = await getOrCreateUUID();
@@ -143,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 1200);
     }
 
+    // Only open cart if it wasn't already open (i.e. not called from recommended)
     if (!cartIsOpen) openCart();
     showToast(`🛒 ${name} added to cart`);
 
@@ -159,6 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // Render Cart 
   function renderCart() {
     cartItemsEl.innerHTML = "";
 
@@ -212,6 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderRecommended();
   }
 
+  // Recommended in Cart 
   function renderRecommended() {
     let recEl = document.getElementById('cart-recommended');
     if (!recEl) {
@@ -252,6 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Qty: pass event to stop propagation 
   window.increaseQty = async function (e, idx) {
     e.stopPropagation();
     cart[idx].quantity++;
@@ -278,6 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // Update just the qty + price in DOM without full re-render (prevents cart closing)
   function updateCartItemEl(idx) {
     const el = document.getElementById(`cart-item-${idx}`);
     if (!el) return;
@@ -316,6 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // Per-item note
   window.updateItemNote = function (idx, value) {
     if (cart[idx]) cart[idx].note = value;
   };
@@ -335,6 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Checkout
   window.openCheckout = function () {
     const selectedItems = cart.filter(i => i.is_select);
     if (!selectedItems.length) {
@@ -348,6 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
     checkoutItems.innerHTML = "";
     let total = 0;
 
+    // Render each item row with its own visible note input + hidden fields
     selectedItems.forEach((item, i) => {
       const lineTotal = item.price * item.quantity;
       total += lineTotal;
@@ -386,6 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target === this) closeCheckout();
   });
 
+  //Category Filter
   const categoryBtns = document.querySelectorAll(".category-btn");
   const menuCards    = document.querySelectorAll(".menu-card");
 
@@ -428,12 +441,15 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/"/g, "&quot;");
   }
 
+  //Clear UUID on success, show track btn
   if (document.querySelector('.alert-success, [data-flash="success"]')) {
+    // Order was just placed — show track button, clear cart UUID on next load
     showTrackOrderBtn();
     localStorage.removeItem(UUID_KEY);
     localStorage.removeItem(UUID_EXPIRY);
   }
 
+  //Track Order Modal
   window.openTrackOrder = async function () {
     if (!customerUUID) { showToast('No active session found.'); return; }
     const modal = document.getElementById('track-order-modal');
@@ -518,9 +534,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  //Track Order Button Visibility
   function showTrackOrderBtn() {
-    document.getElementById('track-order-btn')?.style.setProperty('display', 'flex');
-    document.getElementById('track-order-hamburger')?.style.setProperty('display', 'flex');
+    const isMobile = window.innerWidth <= 768;
+    const fullBtn  = document.getElementById('track-order-btn');
+    const iconBtn  = document.getElementById('track-order-hamburger');
+    if (fullBtn)  fullBtn.style.display  = isMobile ? 'none' : 'flex';
+    if (iconBtn)  iconBtn.style.display  = isMobile ? 'flex' : 'none';
   }
 
   function hideTrackOrderBtn() {
@@ -539,6 +559,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Re-evaluate button on resize (desktop ↔ mobile swap)
+  window.addEventListener('resize', () => {
+    const isVisible = document.getElementById('track-order-btn')?.style.display !== 'none'
+                   || document.getElementById('track-order-hamburger')?.style.display !== 'none';
+    if (isVisible) showTrackOrderBtn();
+  }, { passive: true });
+
+  //Init
   let customerUUID = null;
 
   (async () => {

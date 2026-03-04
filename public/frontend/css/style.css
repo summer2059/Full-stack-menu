@@ -296,8 +296,43 @@ header.scrolled { box-shadow: 0 4px 32px rgba(30,26,22,0.08); }
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1.5rem;
   padding: 2rem 2.5rem 3rem;
-  max-width: 1400px;
+  max-width: 2400px;
   margin: 0 auto;
+  width: 100%;
+}
+
+/* ── Wide screen breakpoints ────────────────── */
+@media (min-width: 1600px) {
+  #menu {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    padding: 2.5rem 4rem 3.5rem;
+    gap: 1.75rem;
+  }
+  header { padding: 0 4rem; }
+  .category-bar { padding: 1.25rem 4rem; }
+  .menu-hero { padding: 3.5rem 4rem 2.5rem; }
+}
+
+@media (min-width: 1920px) {
+  #menu {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    padding: 2.5rem 6rem 3.5rem;
+    gap: 2rem;
+  }
+  header { padding: 0 6rem; }
+  .category-bar { padding: 1.25rem 6rem; }
+  .menu-hero { padding: 3.5rem 6rem 2.5rem; }
+}
+
+@media (min-width: 2560px) {
+  #menu {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    padding: 3rem 8rem 4rem;
+    gap: 2rem;
+  }
+  header { padding: 0 8rem; }
+  .category-bar { padding: 1.25rem 8rem; }
+  .menu-hero { padding: 4rem 8rem 3rem; }
 }
 
 /* ── Menu Card ──────────────────────────────── */
@@ -1051,6 +1086,14 @@ header.scrolled { box-shadow: 0 4px 32px rgba(30,26,22,0.08); }
   .description { display: none; }
   .checkout-content { padding: 1.25rem; }
 
+  /* Add to Cart — icon only on small screens */
+  .cart-btn .btn-text { display: none; }
+  .cart-btn {
+    padding: 0.6rem;
+    font-size: 1rem;
+    border-radius: 10px;
+  }
+
   /* Track modal → bottom sheet on small screens */
   .track-order-modal {
     align-items: flex-end;
@@ -1078,10 +1121,12 @@ header.scrolled { box-shadow: 0 4px 32px rgba(30,26,22,0.08); }
     margin: 0 auto 1rem;
   }
 
+  /* Stack cancel wrap vertically */
   .track-cancel-wrap { flex-direction: column; }
   .track-cancel-input { width: 100%; }
   .track-cancel-btn   { width: 100%; text-align: center; }
 
+  /* Shrink track step labels */
   .track-step-label { font-size: 0.58rem; }
   .track-order-top  { flex-wrap: wrap; gap: 0.4rem; }
 }

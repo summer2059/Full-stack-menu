@@ -41,11 +41,12 @@
                     <span class="discounted-price">NRs.{{ number_format($item->price, 0) }}</span>
                 </div>
 
-                {{-- Add to Cart --}}
+                {{-- Add to Cart — text hidden on mobile, icon only --}}
                 <button class="cart-btn"
                         data-item-id="{{ $item->id }}"
                         onclick="addToCart({{ $item->id }}, '{{ addslashes($item->title) }}', {{ $item->price }})">
-                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="btn-text"> Add to Cart</span>
                 </button>
             </div>
         </div>
