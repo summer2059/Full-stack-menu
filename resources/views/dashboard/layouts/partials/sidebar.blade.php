@@ -2,7 +2,7 @@
     <div>
         <div class="logo-wrapper"><a href="#"><img class="img-fluid logo_img"
                     src="{{ asset(getConfiguration('site_logo')) }}" alt=""></a>
-            <div class="back-btn"><i class="fa fa-angle-left"></i></div>
+            <div class="back-btn"><i class="fas fa-angle-left"></i></div>
             <div class="toggle-sidebar">
                 <svg class="stroke-icon sidebar-toggle status_toggle middle">
                     <use href="{{ asset('dashboard/assets/svg/icon-sprite.svg') }}#toggle-icon"></use>
@@ -20,7 +20,7 @@
                 <ul class="sidebar-links" id="simple-bar">
                     <li class="back-btn"><a href="#"><img class="img-fluid logo_icon"
                                 src="{{ asset(getConfiguration('site_logo')) }}" alt=""></a>
-                        <div class="mobile-back text-end"><span>Back</span><i class="fa fa-angle-right ps-2"
+                        <div class="mobile-back text-end"><span>Back</span><i class="fas fa-angle-right ps-2"
                                 aria-hidden="true"></i></div>
                     </li>
                     <li class="pin-title sidebar-main-title">

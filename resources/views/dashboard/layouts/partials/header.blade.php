@@ -20,7 +20,7 @@
                     <div class="d-flex profile-media align-items-center"><img class="img-30"
                             src="{{ asset('dashboard/assets/images/dashboard/profile.png') }}" alt="">
                         <div class="flex-grow-1"><span>{{ Auth::user()->name }}</span>
-                            <p class="mb-0 font-outfit">Admin<i class="fa fa-angle-down"></i></p>
+                            <p class="mb-0 font-outfit">Admin<i class="fas fa-angle-down"></i></p>
                         </div>
                     </div>
                     <ul class="profile-dropdown onhover-show-div">
